@@ -19,4 +19,8 @@ public class BookService {
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
+//dient om entiteit in database op te slaan
+    public Book addBook(Book book) {
+        return bookRepository.save(book);
+    }
 }
