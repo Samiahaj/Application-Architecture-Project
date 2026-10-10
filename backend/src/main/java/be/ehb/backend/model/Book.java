@@ -1,3 +1,4 @@
+// Stelt een boek voor
 package be.ehb.backend.model;
 
 import jakarta.persistence.*;
