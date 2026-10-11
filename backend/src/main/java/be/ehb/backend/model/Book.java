@@ -4,6 +4,10 @@ package be.ehb.backend.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "books")
@@ -13,18 +17,25 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "ISBN mag niet leeg zijn")
     @Column(nullable = false, unique = true)
     private String isbn;
 
+    @NotBlank(message = "Titel mag niet leeg zijn")
     @Column(nullable = false)
     private String titel;
 
+    @NotBlank(message = "Omschrijving mag niet leeg zijn")
     @Column(nullable = false)
     private String omschrijving;
 
+    @NotNull(message = "Prijs is verplicht")
+    @Positive(message = "Prijs moet groter zijn dan nul")
     @Column(nullable = false)
     private BigDecimal prijs;
 
+    @NotNull(message = "Voorraad is verplicht")
+    @PositiveOrZero(message = "Voorraad mag niet negatief zijn")
     @Column(nullable = false)
     private Integer voorraad;
 
