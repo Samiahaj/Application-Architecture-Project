@@ -1,3 +1,4 @@
+// De Controller ontvangt HTTP-aanvragen, roept de juiste methode van de Service aan en stuurt een antwoord terug naar de gebruiker.
 package be.ehb.backend.controller;
 
 import be.ehb.backend.model.Book;
@@ -8,6 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
+import java.util.Optional;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 // Vertelt aan Spring dat deze klasse HTTP-aanvragen behandelt en resultaten terugstuurt
@@ -27,10 +33,46 @@ public class BookController {
         //De Controller vraagt de Service om alle boeken op te halen. De Service gebruikt daarvoor de Repository.
         return bookService.getAllBooks();
     }
+    // Een boek ophalen op basis van het ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+        Optional<Book> book = bookService.getBookById(id);
+
+        if (book.isPresent()) {
+            return ResponseEntity.ok(book.get());
+        }
+
+        return ResponseEntity.notFound().build();
+    }
 
     @PostMapping
     public Book addBook(@Valid @RequestBody Book book) {
         //boek toevoegen
         return bookService.addBook(book);
+    }
+    // Een bestaand boek aanpassen
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(
+            @PathVariable Long id,
+            @Valid @RequestBody Book book) {
+
+        Book updatedBook = bookService.updateBook(id, book);
+
+        if (updatedBook == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedBook);
+    }
+    // Een boek verwijderen
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        boolean deleted = bookService.deleteBook(id);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
