@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "books")
@@ -38,6 +40,15 @@ public class Book {
     @PositiveOrZero(message = "Voorraad mag niet negatief zijn")
     @Column(nullable = false)
     private Integer voorraad;
+
+    // Een boek kan meerdere auteurs hebben
+    @ManyToMany
+    @JoinTable(
+            name = "book_authors",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id")
+    )
+    private List<Author> auteurs = new ArrayList<>();
 
     public Book() {
     }
@@ -88,5 +99,14 @@ public class Book {
 
     public void setVoorraad(Integer voorraad) {
         this.voorraad = voorraad;
+    }
+    // Geeft de auteurs van het boek terug
+    public List<Author> getAuteurs() {
+        return auteurs;
+    }
+
+    // Hiermee kunnen we de auteurs van een boek aanpassen
+    public void setAuteurs(List<Author> auteurs) {
+        this.auteurs = auteurs;
     }
 }
