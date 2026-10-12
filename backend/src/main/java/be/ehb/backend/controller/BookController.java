@@ -75,4 +75,19 @@ public class BookController {
 
         return ResponseEntity.noContent().build();
     }
+
+    // Voegt een auteur toe aan een boek
+    @PostMapping("/{bookId}/authors/{authorId}")
+    public ResponseEntity<Book> addAuthorToBook(
+            @PathVariable Long bookId,
+            @PathVariable Long authorId) {
+
+        Book book = bookService.addAuthorToBook(bookId, authorId);
+
+        if (book == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(book);
+    }
 }

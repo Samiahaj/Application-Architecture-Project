@@ -4,17 +4,21 @@ import java.util.Optional;
 import be.ehb.backend.model.Book;
 import be.ehb.backend.repository.BookRepository;
 import org.springframework.stereotype.Service;
+import be.ehb.backend.model.Author;
+import be.ehb.backend.repository.AuthorRepository;
 
 import java.util.List;
 //Deze annotatie vertelt aan Spring dat BookService een servicecomponent is die Spring moet beheren.
 @Service
 public class BookService {
 //Boeken uit database afhallen
-    private final BookRepository bookRepository;
-//spring levert benodigde bookrepository aan de service
-    public BookService(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
+private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
+// Spring levert de benodigde repositories aan de service
+public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
+    this.bookRepository = bookRepository;
+    this.authorRepository = authorRepository;
+}
 // alle boeken ophalen
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
@@ -56,5 +60,24 @@ public class BookService {
         }
 
         return false;
+    }
+
+    // Voegt een auteur toe aan een boek
+    public Book addAuthorToBook(Long bookId, Long authorId) {
+        Optional<Book> existingBook = bookRepository.findById(bookId);
+        Optional<Author> existingAuthor = authorRepository.findById(authorId);
+
+        if (existingBook.isEmpty() || existingAuthor.isEmpty()) {
+            return null;
+        }
+
+        Book book = existingBook.get();
+        Author author = existingAuthor.get();
+
+        if (!book.getAuteurs().contains(author)) {
+            book.getAuteurs().add(author);
+        }
+
+        return bookRepository.save(book);
     }
 }

@@ -4,6 +4,8 @@ package be.ehb.backend.model;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "authors")
@@ -14,10 +16,12 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // De naam van de auteur mag niet leeg zijn
+    @NotBlank(message = "Naam mag niet leeg zijn")
     @Column(nullable = false)
     private String naam;
-
     // Een auteur kan meerdere boeken hebben
+    @JsonIgnore
     @ManyToMany(mappedBy = "auteurs")
     private List<Book> boeken = new ArrayList<>();
 
