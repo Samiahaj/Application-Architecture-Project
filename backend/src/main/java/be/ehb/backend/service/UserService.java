@@ -42,4 +42,15 @@ public class UserService {
 
         return user;
     }
+
+    // Haalt een gebruiker op via het e-mailadres
+    public User getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("Gebruiker niet gevonden");
+        }
+
+        return user;
+    }
 }
