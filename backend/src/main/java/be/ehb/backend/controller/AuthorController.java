@@ -6,6 +6,8 @@ import be.ehb.backend.service.AuthorService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,5 +45,30 @@ public class AuthorController {
     @PostMapping
     public Author addAuthor(@Valid @RequestBody Author author) {
         return authorService.addAuthor(author);
+    }
+    // Past een bestaande auteur aan
+    @PutMapping("/{id}")
+    public ResponseEntity<Author> updateAuthor(
+            @PathVariable Long id,
+            @Valid @RequestBody Author updatedAuthor) {
+
+        Author author = authorService.updateAuthor(id, updatedAuthor);
+
+        if (author == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(author);
+    }
+    // Verwijdert een auteur op basis van het ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
+        boolean deleted = authorService.deleteAuthor(id);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
