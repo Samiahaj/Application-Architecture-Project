@@ -29,4 +29,17 @@ public class UserService {
 
         return userRepository.save(user);
     }
+    // Controleert de gegevens van een gebruiker bij het inloggen
+    public User loginUser(String email, String wachtwoord) {
+
+        // Zoekt de gebruiker op basis van het e-mailadres
+        User user = userRepository.findByEmail(email);
+
+        // Controleert of de gebruiker bestaat en het wachtwoord klopt
+        if (user == null || !passwordEncoder.matches(wachtwoord, user.getWachtwoord())) {
+            throw new IllegalArgumentException("E-mailadres of wachtwoord is onjuist");
+        }
+
+        return user;
+    }
 }

@@ -32,4 +32,23 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    // Laat een gebruiker inloggen
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@Valid @RequestBody be.ehb.backend.dto.LoginRequest loginRequest) {
+        try {
+            User user = userService.loginUser(
+                    loginRequest.getEmail(),
+                    loginRequest.getWachtwoord()
+            );
+
+            // Verwijdert het wachtwoord uit het antwoord
+            user.setWachtwoord(null);
+
+            return ResponseEntity.ok(user);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(e.getMessage());
+        }
+    }
 }
