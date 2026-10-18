@@ -232,4 +232,32 @@ class ReservationServiceTest {
         verify(reservationRepository).findByGebruikerIdAndStatus(
                 1L, ReservationStatus.COLLECTED);
     }
+    @Test
+    void createReservation_whenStockIsNull_throwsException() {
+        book.setVoorraad(null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.createReservation(1L, 1L));
+
+        verify(reservationRepository, never()).save(any());
+        verify(bookRepository, never()).save(any());
+    }
+    @Test
+    void updateReservationStatus_whenPendingToCollected_throwsException() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
+
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.updateReservationStatus(
+                        1L, ReservationStatus.COLLECTED));
+
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
 }
