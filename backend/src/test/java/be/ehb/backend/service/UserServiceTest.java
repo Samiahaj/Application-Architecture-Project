@@ -58,4 +58,23 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any(User.class));
     }
+    @Test
+    void registerUserAlwaysAssignsUserRole() {
+        User user = new User();
+        user.setNaam("Test Gebruiker");
+        user.setEmail("test@example.com");
+        user.setWachtwoord("veilig123");
+        user.setRol("ADMIN");
+
+        when(userRepository.existsByEmail("test@example.com"))
+                .thenReturn(false);
+        when(passwordEncoder.encode("veilig123"))
+                .thenReturn("hashedPassword");
+        when(userRepository.save(user)).thenReturn(user);
+
+        User result = userService.registerUser(user);
+
+        assertEquals("USER", result.getRol());
+        verify(userRepository).save(user);
+    }
 }
