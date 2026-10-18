@@ -83,4 +83,16 @@ public class ReservationController {
                     .body(Map.of("fout", e.getMessage()));
         }
     }
+    // Haalt alle opgehaalde reservaties van een gebruiker op
+    @GetMapping("/user/{userId}/collected")
+    public ResponseEntity<?> getCollectedReservationsByUser(
+            @PathVariable Long userId) {
+        try {
+            return ResponseEntity.ok(
+                    reservationService.getCollectedReservationsByUser(userId)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

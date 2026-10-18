@@ -70,7 +70,20 @@ public class ReservationService {
 
         return reservationRepository.findByGebruikerId(userId);
     }
+    // Haalt alle opgehaalde reservaties van een gebruiker op
+    public List<Reservation> getCollectedReservationsByUser(Long userId) {
 
+        // Controleert of de gebruiker bestaat
+        if (!userRepository.existsById(userId)) {
+            throw new IllegalArgumentException("Gebruiker niet gevonden");
+        }
+
+        // Haalt alleen de opgehaalde reservaties op
+        return reservationRepository.findByGebruikerIdAndStatus(
+                userId,
+                ReservationStatus.COLLECTED
+        );
+    }
     // Wijzigt de status van een reservatie
     @Transactional
     public Reservation updateReservationStatus(

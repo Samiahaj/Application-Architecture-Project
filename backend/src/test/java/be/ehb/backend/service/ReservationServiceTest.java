@@ -14,10 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import be.ehb.backend.model.ReservationStatus;
 import java.util.Optional;
-
-
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import java.math.BigDecimal;
-import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -206,5 +207,29 @@ class ReservationServiceTest {
 
         assertEquals(5, book.getVoorraad());
         verify(bookRepository).save(book);
+    }
+
+    @Test
+    void getCollectedReservationsByUser_returnsOnlyCollectedReservations() {
+        when(userRepository.existsById(1L)).thenReturn(true);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setGebruiker(user);
+        reservation.setBoek(book);
+        reservation.setStatus(ReservationStatus.COLLECTED);
+
+        when(reservationRepository.findByGebruikerIdAndStatus(
+                1L, ReservationStatus.COLLECTED))
+                .thenReturn(List.of(reservation));
+
+        List<Reservation> result =
+                reservationService.getCollectedReservationsByUser(1L);
+
+        assertEquals(1, result.size());
+        assertEquals(ReservationStatus.COLLECTED, result.get(0).getStatus());
+
+        verify(reservationRepository).findByGebruikerIdAndStatus(
+                1L, ReservationStatus.COLLECTED);
     }
 }
