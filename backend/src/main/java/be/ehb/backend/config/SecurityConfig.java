@@ -39,6 +39,8 @@ public class SecurityConfig {
                                 "/api/authors",
                                 "/api/authors/**"
                         ).permitAll()
+                        .requestMatchers("/api/reservations/*/status")
+                        .hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 
