@@ -13,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import be.ehb.backend.model.ReservationStatus;
+import java.util.Optional;
+
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -135,5 +137,74 @@ class ReservationServiceTest {
                         99L, ReservationStatus.READY));
 
         verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+    @Test
+    void updateReservationStatus_whenReservationIsCancelled_throwsException() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.CANCELLED);
+
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.updateReservationStatus(
+                        1L, ReservationStatus.READY));
+
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void updateReservationStatus_whenReservationIsCollected_throwsException() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.COLLECTED);
+
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.updateReservationStatus(
+                        1L, ReservationStatus.CANCELLED));
+
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+    @Test
+    void createReservation_decreasesBookStock() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        int initialStock = book.getVoorraad();
+
+        reservationService.createReservation(1L, 1L);
+
+        assertEquals(initialStock - 1, book.getVoorraad());
+        verify(bookRepository).save(book);
+    }
+
+    @Test
+    void updateReservationStatus_whenCancelled_restoresBookStock() {
+        book.setVoorraad(4);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setGebruiker(user);
+        reservation.setBoek(book);
+        reservation.setStatus(ReservationStatus.READY);
+
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
+        when(bookRepository.save(any(Book.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        reservationService.updateReservationStatus(
+                1L, ReservationStatus.CANCELLED);
+
+        assertEquals(5, book.getVoorraad());
+        verify(bookRepository).save(book);
     }
 }

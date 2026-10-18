@@ -48,6 +48,9 @@ public class ReservationService {
         if (book.getVoorraad() == null || book.getVoorraad() <= 0) {
             throw new IllegalArgumentException("Geen voorraad beschikbaar");
         }
+        // Vermindert de voorraad bij een reservatie
+        book.setVoorraad(book.getVoorraad() - 1);
+        bookRepository.save(book);
 
         Reservation reservation = new Reservation();
         reservation.setGebruiker(user);
@@ -69,14 +72,40 @@ public class ReservationService {
     }
 
     // Wijzigt de status van een reservatie
-    public Reservation updateReservationStatus(Long reservationId,
-                                               ReservationStatus newStatus) {
+    public Reservation updateReservationStatus(
+            Long reservationId,
+            ReservationStatus newStatus) {
+
         // Zoekt de reservatie op
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Reservatie niet gevonden"));
 
-        // Wijzigt de status
+        ReservationStatus currentStatus = reservation.getStatus();
+
+        // Controleert of de status gewijzigd mag worden
+        boolean validTransition =
+                (currentStatus == ReservationStatus.PENDING
+                        && (newStatus == ReservationStatus.READY
+                        || newStatus == ReservationStatus.CANCELLED))
+                        || (currentStatus == ReservationStatus.READY
+                        && (newStatus == ReservationStatus.COLLECTED
+                        || newStatus == ReservationStatus.CANCELLED));
+
+        if (!validTransition) {
+            throw new IllegalArgumentException(
+                    "Ongeldige statusovergang: "
+                            + currentStatus + " naar " + newStatus);
+        }
+
+        // Herstelt de voorraad wanneer een reservatie wordt geannuleerd
+        if (newStatus == ReservationStatus.CANCELLED) {
+            Book book = reservation.getBoek();
+            book.setVoorraad(book.getVoorraad() + 1);
+            bookRepository.save(book);
+        }
+
+// Slaat de nieuwe status op
         reservation.setStatus(newStatus);
 
         return reservationRepository.save(reservation);
