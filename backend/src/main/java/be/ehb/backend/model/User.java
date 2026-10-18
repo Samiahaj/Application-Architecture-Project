@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "users")
@@ -25,6 +26,7 @@ public class User {
     @NotBlank(message = "Wachtwoord mag niet leeg zijn")
     @Size(min = 8, message = "Wachtwoord moet minstens 8 tekens bevatten")
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wachtwoord;
 
     public User() {

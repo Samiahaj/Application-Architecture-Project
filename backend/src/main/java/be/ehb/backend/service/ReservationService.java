@@ -9,6 +9,8 @@ import be.ehb.backend.repository.ReservationRepository;
 import be.ehb.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+
 
 import java.time.LocalDateTime;
 
@@ -52,6 +54,30 @@ public class ReservationService {
         reservation.setBoek(book);
         reservation.setReservatieDatum(LocalDateTime.now());
         reservation.setStatus(ReservationStatus.PENDING);
+
+        return reservationRepository.save(reservation);
+    }
+
+    // Haalt alle reservaties van een gebruiker op
+    public List<Reservation> getReservationsByUser(Long userId) {
+        // Controleert of de gebruiker bestaat
+        if (!userRepository.existsById(userId)) {
+            throw new IllegalArgumentException("Gebruiker niet gevonden");
+        }
+
+        return reservationRepository.findByGebruikerId(userId);
+    }
+
+    // Wijzigt de status van een reservatie
+    public Reservation updateReservationStatus(Long reservationId,
+                                               ReservationStatus newStatus) {
+        // Zoekt de reservatie op
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Reservatie niet gevonden"));
+
+        // Wijzigt de status
+        reservation.setStatus(newStatus);
 
         return reservationRepository.save(reservation);
     }

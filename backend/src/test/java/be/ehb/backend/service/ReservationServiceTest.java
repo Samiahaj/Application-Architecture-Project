@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import be.ehb.backend.model.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -105,5 +106,34 @@ class ReservationServiceTest {
                 () -> reservationService.createReservation(1L, 1L));
 
         verify(reservationRepository, never()).save(any());
+    }
+    @Test
+    void updateReservationStatus_whenReservationExists_updatesStatus() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setStatus(ReservationStatus.PENDING);
+
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Reservation result = reservationService.updateReservationStatus(
+                1L, ReservationStatus.READY);
+
+        assertEquals(ReservationStatus.READY, result.getStatus());
+        verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    void updateReservationStatus_whenReservationDoesNotExist_throwsException() {
+        when(reservationRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservationService.updateReservationStatus(
+                        99L, ReservationStatus.READY));
+
+        verify(reservationRepository, never()).save(any(Reservation.class));
     }
 }
