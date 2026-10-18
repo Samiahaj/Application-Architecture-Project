@@ -72,6 +72,7 @@ public class ReservationService {
     }
 
     // Wijzigt de status van een reservatie
+    @Transactional
     public Reservation updateReservationStatus(
             Long reservationId,
             ReservationStatus newStatus) {
