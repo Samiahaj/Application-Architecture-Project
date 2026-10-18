@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wachtwoord;
+    // De rol van de gebruiker
+    @Column(nullable = false)
+    private String rol = "USER";
 
     public User() {
     }
@@ -62,5 +65,13 @@ public class User {
 
     public void setWachtwoord(String wachtwoord) {
         this.wachtwoord = wachtwoord;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 }

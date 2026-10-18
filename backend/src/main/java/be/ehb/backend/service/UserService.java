@@ -23,7 +23,8 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Dit e-mailadres is al in gebruik");
         }
-
+// Bepaalt de standaardrol voor nieuwe gebruikers
+        user.setRol("USER");
         // Versleutelt het wachtwoord voor het opslaan
         user.setWachtwoord(passwordEncoder.encode(user.getWachtwoord()));
 
