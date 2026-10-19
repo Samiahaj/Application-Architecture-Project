@@ -1,7 +1,6 @@
 package be.ehb.backend.controller;
 
 import be.ehb.backend.model.User;
-import be.ehb.backend.dto.LoginRequest;
 import be.ehb.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,9 +12,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -50,7 +52,7 @@ public class UserController {
     // Laat een gebruiker inloggen en maakt een beveiligde sessie aan
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
-            @Valid @RequestBody LoginRequest loginRequest,
+            @Valid @RequestBody be.ehb.backend.dto.LoginRequest loginRequest,
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -75,25 +77,141 @@ public class UserController {
 
             return ResponseEntity.ok(user);
 
-        } catch (org.springframework.security.core.AuthenticationException e) {
-            SecurityContextHolder.clearContext();
-
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("E-mailadres of wachtwoord is onjuist");
         }
     }
 
-    // Haalt het profiel op van de ingelogde gebruiker
+    // Haalt het profiel van de ingelogde gebruiker op
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        try {
+            if (authentication == null
+                    || !authentication.isAuthenticated()
+                    || "anonymousUser".equals(authentication.getName())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Je moet ingelogd zijn");
+            }
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            User user = userService.getUserByEmail(authentication.getName());
+            user.setWachtwoord(null);
+
+            return ResponseEntity.ok(user);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+
+    // Wijzigt de naam en het e-mailadres van de ingelogde gebruiker
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestBody Map<String, String> gegevens,
+            Authentication authentication) {
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Je moet ingelogd zijn");
         }
 
-        User user = userService.getUserByEmail(authentication.getName());
-        user.setWachtwoord(null);
+        try {
+            User user = userService.updateProfile(
+                    authentication.getName(),
+                    gegevens.get("naam"),
+                    gegevens.get("email")
+            );
 
-        return ResponseEntity.ok(user);
+            user.setWachtwoord(null);
+
+            return ResponseEntity.ok(user);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // Wijzigt het wachtwoord van de ingelogde gebruiker
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(
+            @RequestBody Map<String, String> gegevens,
+            Authentication authentication) {
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Je moet ingelogd zijn");
+        }
+
+        try {
+            userService.updatePassword(
+                    authentication.getName(),
+                    gegevens.get("oudWachtwoord"),
+                    gegevens.get("nieuwWachtwoord")
+            );
+
+            return ResponseEntity.ok(
+                    Map.of("bericht", "Wachtwoord succesvol gewijzigd")
+            );
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    // Haalt alle gebruikers op voor het beheerdersdashboard
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    // Wijzigt de rol van een gebruiker
+    @PutMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> gegevens) {
+
+        try {
+            User user = userService.updateUserRole(
+                    id,
+                    gegevens.get("rol")
+            );
+
+            return ResponseEntity.ok(user);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("fout", e.getMessage()));
+        }
+    }
+
+    // Verwijdert een gebruiker
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("fout", "Je moet ingelogd zijn"));
+        }
+
+        try {
+            userService.deleteUser(id, authentication.getName());
+
+            return ResponseEntity.noContent().build();
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("fout", e.getMessage()));
+        }
     }
 }

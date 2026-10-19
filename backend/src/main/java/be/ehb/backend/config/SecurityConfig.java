@@ -16,10 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -46,6 +48,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Routes publiques
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
@@ -55,8 +58,28 @@ public class SecurityConfig {
                                 "/api/authors/**",
                                 "/logout"
                         ).permitAll()
+
+                        // Beheer van gebruikers is alleen voor beheerders
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/api/users"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.PUT,
+                                "/api/users/*/role"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.DELETE,
+                                "/api/users/*"
+                        ).hasRole("ADMIN")
+
+                        // Alleen beheerders mogen reserveringsstatussen wijzigen
                         .requestMatchers("/api/reservations/*/status")
                         .hasRole("ADMIN")
+
+                        // Alle andere routes vereisen een login
                         .anyRequest().authenticated()
                 );
 

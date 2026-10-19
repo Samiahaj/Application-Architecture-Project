@@ -1,135 +1,161 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../api/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import PageLayout from '../components/PageLayout.jsx';
 
-function LoginPage() {
-    const navigate = useNavigate()
-    const { laadGebruiker } = useAuth()
-    const [email, setEmail] = useState('')
-    const [wachtwoord, setWachtwoord] = useState('')
-    const [foutmelding, setFoutmelding] = useState('')
-    const [bezig, setBezig] = useState(false)
+export default function LoginPage() {
+    const [email, setEmail] = useState('');
+    const [wachtwoord, setWachtwoord] = useState('');
+    const [fout, setFout] = useState('');
+    const [laden, setLaden] = useState(false);
 
-    async function handleSubmit(event) {
-        event.preventDefault()
+    const { gebruiker, setGebruiker, authLaden } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
-        setFoutmelding('')
-        setBezig(true)
+    if (authLaden) {
+        return (
+            <PageLayout>
+                <main className="auth-page">
+                    <p className="status-message">
+                        Je gegevens worden geladen…
+                    </p>
+                </main>
+            </PageLayout>
+        );
+    }
+
+    if (gebruiker) {
+        return (
+            <Navigate
+                to={gebruiker.rol === 'ADMIN' ? '/admin' : '/home'}
+                replace
+            />
+        );
+    }
+
+    async function verzend(event) {
+        event.preventDefault();
+
+        setFout('');
+        setLaden(true);
 
         try {
-            const response = await fetch('http://localhost:8080/api/users/login', {
+            const ingelogdeGebruiker = await apiFetch('/api/users/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
                 body: JSON.stringify({
-                    email,
+                    email: email.trim(),
                     wachtwoord,
                 }),
-            })
+            });
 
-            if (!response.ok) {
-                const fout = await response.text()
-                throw new Error(fout || 'E-mailadres of wachtwoord is onjuist.')
+            if (!ingelogdeGebruiker?.rol) {
+                throw new Error(
+                    'De server heeft geen gebruikersrol teruggestuurd.'
+                );
             }
 
-            await laadGebruiker()
+            setGebruiker(ingelogdeGebruiker);
 
-            const responseProfiel = await fetch(
-                'http://localhost:8080/api/users/profile',
-                {
-                    credentials: 'include',
-                },
-            )
+            // Standaardbestemming na het inloggen.
+            const standaardBestemming =
+                ingelogdeGebruiker.rol === 'ADMIN'
+                    ? '/admin'
+                    : '/home';
 
-            if (!responseProfiel.ok) {
-                throw new Error('Het gebruikersprofiel kon niet worden geladen.')
-            }
+            // Bewaar eventueel de oorspronkelijke bestemming,
+            // bijvoorbeeld wanneer de gebruiker eerst een boek wilde bekijken.
+            const vorigeBestemming = location.state?.from;
 
-            const profiel = await responseProfiel.json()
+            const bestemming =
+                typeof vorigeBestemming === 'string' &&
+                vorigeBestemming.startsWith('/') &&
+                !vorigeBestemming.startsWith('//')
+                    ? vorigeBestemming
+                    : standaardBestemming;
 
-            if (profiel.rol === 'ADMIN') {
-                navigate('/admin')
-            } else {
-                navigate('/')
-            }
+            navigate(bestemming, { replace: true });
         } catch (error) {
-            setFoutmelding(
-                error.message || 'Er is iets misgegaan. Probeer het opnieuw.',
-            )
+            setFout(
+                error.message ||
+                'Inloggen is niet gelukt. Controleer je gegevens.'
+            );
         } finally {
-            setBezig(false)
+            setLaden(false);
         }
     }
 
     return (
-        <main className="auth-page">
-            <div className="auth-card">
-                <Link className="logo" to="/">
-                    <span className="logo-icon">B</span>
-                    <span className="logo-name">
-            Boek<span>Haven</span>
-          </span>
-                </Link>
+        <PageLayout>
+            <main className="auth-page">
+                <section className="auth-card">
+                    <p className="eyebrow">FIJN DAT JE ER BENT</p>
 
-                <h1>Welkom terug</h1>
-                <p>Log in en ontdek jouw volgende leesavontuur.</p>
+                    <h1>Welkom terug.</h1>
 
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="login-email">E-mailadres</label>
-                    <input
-                        id="login-email"
-                        name="email"
-                        type="email"
-                        placeholder="jouw@email.be"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        required
-                    />
+                    <p className="auth-intro">
+                        Log in om je account en reservaties te bekijken.
+                    </p>
 
-                    <label htmlFor="login-password">Wachtwoord</label>
-                    <input
-                        id="login-password"
-                        name="wachtwoord"
-                        type="password"
-                        placeholder="Jouw wachtwoord"
-                        autoComplete="current-password"
-                        value={wachtwoord}
-                        onChange={(event) => setWachtwoord(event.target.value)}
-                        required
-                    />
-
-                    {foutmelding && (
-                        <p className="auth-error" role="alert">
-                            {foutmelding}
-                        </p>
+                    {location.state?.bericht && (
+                        <div className="alert alert-success">
+                            {location.state.bericht}
+                        </div>
                     )}
 
-                    <button
-                        className="primary-button auth-submit"
-                        type="submit"
-                        disabled={bezig}
-                    >
-                        {bezig ? 'Bezig...' : 'Inloggen'}
-                    </button>
-                </form>
+                    {fout && (
+                        <div className="alert alert-error" role="alert">
+                            {fout}
+                        </div>
+                    )}
 
-                <p className="auth-switch">
-                    Nog geen account? <Link to="/register">Registreren</Link>
-                </p>
+                    <form onSubmit={verzend} className="form-stack">
+                        <label>
+                            E-mailadres
 
-                <button
-                    className="text-button auth-back"
-                    type="button"
-                    onClick={() => navigate('/')}
-                >
-                    ← Terug naar de homepagina
-                </button>
-            </div>
-        </main>
-    )
+                            <input
+                                type="email"
+                                autoComplete="email"
+                                value={email}
+                                onChange={(event) =>
+                                    setEmail(event.target.value)
+                                }
+                                required
+                            />
+                        </label>
+
+                        <label>
+                            Wachtwoord
+
+                            <input
+                                type="password"
+                                autoComplete="current-password"
+                                value={wachtwoord}
+                                onChange={(event) =>
+                                    setWachtwoord(event.target.value)
+                                }
+                                required
+                            />
+                        </label>
+
+                        <button
+                            className="button button-full"
+                            type="submit"
+                            disabled={laden}
+                        >
+                            {laden
+                                ? 'Bezig met inloggen…'
+                                : 'Inloggen'}
+                        </button>
+                    </form>
+
+                    <p className="auth-switch">
+                        Nog geen account?{' '}
+                        <Link to="/register">Maak er een aan</Link>
+                    </p>
+                </section>
+            </main>
+        </PageLayout>
+    );
 }
-
-export default LoginPage

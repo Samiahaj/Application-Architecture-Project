@@ -1,70 +1,42 @@
-import {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { apiFetch } from '../api/api.js';
 
-const AuthContext = createContext(null)
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [gebruiker, setGebruiker] = useState(null)
-    const [laden, setLaden] = useState(true)
+    const [gebruiker, setGebruiker] = useState(null);
+    const [authLaden, setAuthLaden] = useState(true);
 
-    async function laadGebruiker() {
+    const laadGebruiker = useCallback(async () => {
         try {
-            const response = await fetch(
-                'http://localhost:8080/api/users/profile',
-                {
-                    method: 'GET',
-                    credentials: 'include',
-                },
-            )
-
-            if (!response.ok) {
-                setGebruiker(null)
-                return
-            }
-
-            const gegevens = await response.json()
-            setGebruiker(gegevens)
-        } catch (error) {
-            console.error(
-                'Fout bij het ophalen van de gebruiker:',
-                error,
-            )
-            setGebruiker(null)
+            const profiel = await apiFetch('/api/users/profile');
+            setGebruiker(profiel);
+            return profiel;
+        } catch {
+            setGebruiker(null);
+            return null;
         } finally {
-            setLaden(false)
+            setAuthLaden(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        laadGebruiker()
-    }, [])
+        laadGebruiker();
+    }, [laadGebruiker]);
 
-    return (
-        <AuthContext.Provider
-            value={{
-                gebruiker,
-                setGebruiker,
-                laden,
-                laadGebruiker,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    )
+    const waarde = useMemo(() => ({
+        gebruiker,
+        setGebruiker,
+        authLaden,
+        laadGebruiker,
+        isAdmin: gebruiker?.rol === 'ADMIN',
+    }), [gebruiker, authLaden, laadGebruiker]);
+
+    return <AuthContext.Provider value={waarde}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext)
-
-    if (!context) {
-        throw new Error(
-            'useAuth moet binnen AuthProvider worden gebruikt.',
-        )
-    }
-
-    return context
+    const context = useContext(AuthContext);
+    if (!context) throw new Error('useAuth moet binnen AuthProvider gebruikt worden.');
+    return context;
 }

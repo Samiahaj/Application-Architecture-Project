@@ -1,26 +1,38 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 
-function ProtectedRoute({ role }) {
-    const { gebruiker, laden } = useAuth()
+export default function ProtectedRoute({ role }) {
+    const { gebruiker, authLaden } = useAuth();
+    const locatie = useLocation();
 
-    if (laden) {
-        return <p className="loading-message">Laden...</p>
+    if (authLaden) {
+        return (
+            <main className="page-shell">
+                <p className="status-message">
+                    Je gegevens worden geladen...
+                </p>
+            </main>
+        );
     }
 
     if (!gebruiker) {
-        return <Navigate to="/login" replace />
+        return (
+            <Navigate
+                to="/login"
+                replace
+                state={{ from: locatie }}
+            />
+        );
     }
 
     if (role && gebruiker.rol !== role) {
-        if (gebruiker.rol === 'ADMIN') {
-            return <Navigate to="/admin" replace />
-        }
-
-        return <Navigate to="/" replace />
+        return (
+            <Navigate
+                to={gebruiker.rol === 'ADMIN' ? '/admin' : '/home'}
+                replace
+            />
+        );
     }
 
-    return <Outlet />
+    return <Outlet />;
 }
-
-export default ProtectedRoute

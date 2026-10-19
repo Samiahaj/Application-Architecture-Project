@@ -1,55 +1,104 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { useAuth } from './context/AuthContext.jsx'
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import HomePage from './pages/HomePage.jsx'
-import LoginPage from './pages/LoginPage.jsx'
-import RegisterPage from './pages/RegisterPage.jsx'
-import ProtectedRoute from './components/ProtectedRoute.jsx'
+import { useAuth } from './context/AuthContext.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
-function AdminDashboardPage() {
-    const { gebruiker } = useAuth()
+// Openbare pagina's
+import HomePage from './pages/HomePage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import BookDetailPage from './pages/user/BookDetailPage.jsx';
 
-    return (
-        <main className="auth-page">
-            <div className="auth-card">
-                <h1>Admin dashboard</h1>
-                <p>Welkom, {gebruiker?.naam}!</p>
+// Gebruikerspagina's
+import UserHomePage from './pages/user/UserHomePage.jsx';
+import ProfilePage from './pages/user/ProfilePage.jsx';
+import ReservationPage from './pages/user/ReservationPage.jsx';
 
-                <p>Beheer hier de gebruikers, boeken en reserveringen.</p>
-            </div>
-        </main>
-    )
+// Beheerderspagina's
+import AdminHomePage from './pages/admin/AdminHomePage.jsx';
+import UserManagementPage from './pages/admin/UserManagementPage.jsx';
+import BookManagementPage from './pages/admin/BookManagementPage.jsx';
+import ReservationManagementPage from './pages/admin/ReservationManagementPage.jsx';
+
+function StartRedirect() {
+    const { gebruiker, authLaden } = useAuth();
+
+    if (authLaden) {
+        return (
+            <main className="page-shell">
+                <p className="status-message">
+                    Je gegevens worden geladen...
+                </p>
+            </main>
+        );
+    }
+
+    if (!gebruiker) {
+        return <Navigate to="/" replace />;
+    }
+
+    if (gebruiker.rol === 'ADMIN') {
+        return <Navigate to="/admin" replace />;
+    }
+
+    return <Navigate to="/home" replace />;
 }
 
-function App() {
+export default function App() {
     return (
         <Routes>
+            {/* Openbare pagina's */}
             <Route path="/" element={<HomePage />} />
-
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
+            {/* Boekdetails zijn openbaar */}
+            <Route path="/boeken/:id" element={<BookDetailPage />} />
+
+            {/* Gebruikerspagina's */}
             <Route element={<ProtectedRoute role="USER" />}>
+                <Route path="/home" element={<UserHomePage />} />
+                <Route path="/profiel" element={<ProfilePage />} />
                 <Route
-                    path="/mijn-account"
-                    element={<MijnAccountRedirect />}
+                    path="/mijn-reserveringen"
+                    element={<ReservationPage />}
                 />
             </Route>
 
+            {/* Beheerderspagina's */}
             <Route element={<ProtectedRoute role="ADMIN" />}>
                 <Route
                     path="/admin"
-                    element={<AdminDashboardPage />}
+                    element={<AdminHomePage />}
+                />
+
+                <Route
+                    path="/admin/gebruikers"
+                    element={<UserManagementPage />}
+                />
+
+                <Route
+                    path="/admin/boeken"
+                    element={<BookManagementPage />}
+                />
+
+                <Route
+                    path="/admin/reserveringen"
+                    element={<ReservationManagementPage />}
                 />
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Doorverwijzing na het inloggen */}
+            <Route
+                path="/start"
+                element={<StartRedirect />}
+            />
+
+            {/* Onbekende pagina's */}
+            <Route
+                path="*"
+                element={<Navigate to="/" replace />}
+            />
         </Routes>
-    )
+    );
 }
-
-function MijnAccountRedirect() {
-    return <Navigate to="/" replace />
-}
-
-export default App

@@ -1,130 +1,37 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../api/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import PageLayout from '../components/PageLayout.jsx';
 
-function RegisterPage() {
-    const navigate = useNavigate()
+export default function RegisterPage() {
+    const [naam, setNaam] = useState('');
+    const [email, setEmail] = useState('');
+    const [wachtwoord, setWachtwoord] = useState('');
+    const [bevestiging, setBevestiging] = useState('');
+    const [fout, setFout] = useState('');
+    const [laden, setLaden] = useState(false);
+    const { gebruiker, authLaden } = useAuth();
+    const navigate = useNavigate();
 
-    const [naam, setNaam] = useState('')
-    const [email, setEmail] = useState('')
-    const [wachtwoord, setWachtwoord] = useState('')
-    const [foutmelding, setFoutmelding] = useState('')
-    const [bezig, setBezig] = useState(false)
+    if (authLaden) return <PageLayout><main className="auth-page"><p className="status-message">Je gegevens worden geladen…</p></main></PageLayout>;
+    if (gebruiker) return <Navigate to={gebruiker.rol === 'ADMIN' ? '/admin' : '/mijn-account'} replace />;
 
-    async function handleSubmit(event) {
-        event.preventDefault()
-
-        setFoutmelding('')
-        setBezig(true)
-
+    async function verzend(event) {
+        event.preventDefault();
+        setFout('');
+        if (wachtwoord.length < 8) { setFout('Je wachtwoord moet minstens 8 tekens bevatten.'); return; }
+        if (wachtwoord !== bevestiging) { setFout('De wachtwoorden komen niet overeen.'); return; }
+        setLaden(true);
         try {
-            const response = await fetch('http://localhost:8080/api/users/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    naam,
-                    email,
-                    wachtwoord,
-                }),
-            })
-
-            if (!response.ok) {
-                const fout = await response.text()
-                throw new Error(fout || 'Registreren is mislukt.')
-            }
-
-            alert('Je account is aangemaakt! Je kunt nu inloggen.')
-            navigate('/login')
+            await apiFetch('/api/users/register', { method: 'POST', body: JSON.stringify({ naam: naam.trim(), email: email.trim(), wachtwoord }) });
+            navigate('/login', { replace: true, state: { bericht: 'Je account is aangemaakt. Je kunt nu inloggen.' } });
         } catch (error) {
-            setFoutmelding(
-                error.message || 'Er is iets misgegaan. Probeer het opnieuw.',
-            )
+            setFout(error.message || 'Registreren is niet gelukt.');
         } finally {
-            setBezig(false)
+            setLaden(false);
         }
     }
 
-    return (
-        <main className="auth-page">
-            <div className="auth-card">
-                <Link className="logo" to="/">
-                    <span className="logo-icon">B</span>
-                    <span className="logo-name">
-            Boek<span>Haven</span>
-          </span>
-                </Link>
-
-                <h1>Maak je account aan</h1>
-                <p>Word lid van BoekHaven en ontdek nieuwe verhalen.</p>
-
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="register-name">Naam</label>
-                    <input
-                        id="register-name"
-                        name="naam"
-                        type="text"
-                        placeholder="Jouw naam"
-                        autoComplete="name"
-                        value={naam}
-                        onChange={(event) => setNaam(event.target.value)}
-                        required
-                    />
-
-                    <label htmlFor="register-email">E-mailadres</label>
-                    <input
-                        id="register-email"
-                        name="email"
-                        type="email"
-                        placeholder="jouw@email.be"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        required
-                    />
-
-                    <label htmlFor="register-password">Wachtwoord</label>
-                    <input
-                        id="register-password"
-                        name="wachtwoord"
-                        type="password"
-                        placeholder="Minstens 8 tekens"
-                        autoComplete="new-password"
-                        minLength={8}
-                        value={wachtwoord}
-                        onChange={(event) => setWachtwoord(event.target.value)}
-                        required
-                    />
-
-                    {foutmelding && (
-                        <p className="auth-error" role="alert">
-                            {foutmelding}
-                        </p>
-                    )}
-
-                    <button
-                        className="primary-button auth-submit"
-                        type="submit"
-                        disabled={bezig}
-                    >
-                        {bezig ? 'Bezig...' : 'Account aanmaken'}
-                    </button>
-                </form>
-
-                <p className="auth-switch">
-                    Heb je al een account? <Link to="/login">Inloggen</Link>
-                </p>
-
-                <button
-                    className="text-button auth-back"
-                    type="button"
-                    onClick={() => navigate('/')}
-                >
-                    ← Terug naar de homepagina
-                </button>
-            </div>
-        </main>
-    )
+    return <PageLayout><main className="auth-page"><section className="auth-card"><p className="eyebrow">WORD DEEL VAN BOEKHAVEN</p><h1>Maak je account.</h1><p className="auth-intro">Bewaar je plek en volg je boekreservaties.</p>{fout && <div className="alert alert-error" role="alert">{fout}</div>}<form onSubmit={verzend} className="form-stack"><label>Naam<input type="text" autoComplete="name" value={naam} onChange={(event) => setNaam(event.target.value)} required /></label><label>E-mailadres<input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label>Wachtwoord<input type="password" autoComplete="new-password" minLength={8} value={wachtwoord} onChange={(event) => setWachtwoord(event.target.value)} required /><small>Minstens 8 tekens.</small></label><label>Bevestig wachtwoord<input type="password" autoComplete="new-password" value={bevestiging} onChange={(event) => setBevestiging(event.target.value)} required /></label><button className="button button-full" type="submit" disabled={laden}>{laden ? 'Account wordt aangemaakt…' : 'Account aanmaken'}</button></form><p className="auth-switch">Heb je al een account? <Link to="/login">Log in</Link></p></section></main></PageLayout>;
 }
-
-export default RegisterPage
