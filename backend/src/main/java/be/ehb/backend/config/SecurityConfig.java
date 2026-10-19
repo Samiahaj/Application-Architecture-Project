@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 public class SecurityConfig {
 
@@ -34,6 +36,15 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(200);
+                        })
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/users/register",
@@ -41,7 +52,8 @@ public class SecurityConfig {
                                 "/api/books",
                                 "/api/books/**",
                                 "/api/authors",
-                                "/api/authors/**"
+                                "/api/authors/**",
+                                "/logout"
                         ).permitAll()
                         .requestMatchers("/api/reservations/*/status")
                         .hasRole("ADMIN")
@@ -73,22 +85,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Staat de React-frontend toe om verzoeken te versturen
         configuration.setAllowedOrigins(
-                java.util.List.of("http://localhost:5173")
+                List.of("http://localhost:5173", "http://localhost:5174")
         );
 
-        // Staat de nodige HTTP-methoden toe
         configuration.setAllowedMethods(
-                java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );
 
-        // Staat de nodige headers toe
-        configuration.setAllowedHeaders(
-                java.util.List.of("*")
-        );
+        configuration.setAllowedHeaders(List.of("*"));
 
-        // Staat sessiecookies toe voor de authenticatie
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =

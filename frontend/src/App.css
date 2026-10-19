@@ -1604,3 +1604,113 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Aanmeldpagina's */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f7f3eb;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  background: #fffdf8;
+  border: 1px solid #e6ddcf;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgb(74 52 35 / 8%);
+}
+
+.auth-card > .logo {
+  display: inline-flex;
+  margin-bottom: 28px;
+  text-decoration: none;
+}
+
+.auth-card h1 {
+  margin-bottom: 12px;
+}
+
+.auth-card > p {
+  line-height: 1.6;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.auth-card label {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #d8cbbb;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.auth-card input:focus {
+  outline: 2px solid #9a7455;
+  outline-offset: 2px;
+}
+
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 14px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.auth-switch {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: #80583c;
+  font-weight: 600;
+}
+
+.auth-back {
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
+.auth-error {
+  color: #b42318;
+  background-color: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 12px 0;
+}
+
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.welcome-user {
+  color: var(--brown);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
