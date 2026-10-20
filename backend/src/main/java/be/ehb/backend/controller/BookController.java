@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 // Vertelt aan Spring dat deze klasse HTTP-aanvragen behandelt en resultaten terugstuurt
@@ -44,11 +45,16 @@ public class BookController {
 
         return ResponseEntity.notFound().build();
     }
-
     @PostMapping
-    public Book addBook(@Valid @RequestBody Book book) {
-        //boek toevoegen
-        return bookService.addBook(book);
+    public ResponseEntity<?> addBook(@Valid @RequestBody Book book) {
+        try {
+            Book newBook = bookService.addBook(book);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newBook);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    java.util.Map.of("message", e.getMessage())
+            );
+        }
     }
     // Een bestaand boek aanpassen
     @PutMapping("/{id}")

@@ -52,14 +52,53 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
-                                "/api/books",
-                                "/api/books/**",
-                                "/api/authors",
-                                "/api/authors/**",
                                 "/logout"
                         ).permitAll()
 
-                        // Beheer van gebruikers is alleen voor beheerders
+                        // Boeken en auteurs bekijken is openbaar
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/api/books",
+                                "/api/books/**",
+                                "/api/authors",
+                                "/api/authors/**"
+                        ).permitAll()
+
+                        // Alleen beheerders mogen boeken beheren
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.POST,
+                                "/api/books",
+                                "/api/books/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.PUT,
+                                "/api/books/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.DELETE,
+                                "/api/books/**"
+                        ).hasRole("ADMIN")
+
+                        // Alleen beheerders mogen auteurs beheren
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.POST,
+                                "/api/authors",
+                                "/api/authors/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.PUT,
+                                "/api/authors/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.DELETE,
+                                "/api/authors/**"
+                        ).hasRole("ADMIN")
+
+                        // Gebruikersbeheer is alleen voor beheerders
                         .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,
                                 "/api/users"
@@ -76,8 +115,9 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         // Alleen beheerders mogen reserveringsstatussen wijzigen
-                        .requestMatchers("/api/reservations/*/status")
-                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/reservations/*/status"
+                        ).hasRole("ADMIN")
 
                         // Alle andere routes vereisen een login
                         .anyRequest().authenticated()

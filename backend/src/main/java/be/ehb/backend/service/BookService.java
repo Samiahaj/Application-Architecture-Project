@@ -6,6 +6,7 @@ import be.ehb.backend.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import be.ehb.backend.model.Author;
 import be.ehb.backend.repository.AuthorRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 //Deze annotatie vertelt aan Spring dat BookService een servicecomponent is die Spring moet beheren.
@@ -24,9 +25,23 @@ public BookService(BookRepository bookRepository, AuthorRepository authorReposit
         return bookRepository.findAll();
     }
 //dient om entiteit in database op te slaan
-    public Book addBook(Book book) {
-        return bookRepository.save(book);
+public Book addBook(Book book) {
+    if (bookRepository.existsByIsbn(book.getIsbn())) {
+        throw new IllegalArgumentException(
+                "Dit ISBN is al in gebruik. Kies een ander ISBN."
+        );
     }
+
+    book.setAuteurs(laadAuteurs(book.getAuteurs()));
+
+    try {
+        return bookRepository.save(book);
+    } catch (DataIntegrityViolationException e) {
+        throw new IllegalArgumentException(
+                "Dit ISBN is al in gebruik. Kies een ander ISBN."
+        );
+    }
+}
     // Een boek ophalen op basis van het ID
     public Optional<Book> getBookById(Long id) {
         return bookRepository.findById(id);
@@ -36,19 +51,36 @@ public BookService(BookRepository bookRepository, AuthorRepository authorReposit
     public Book updateBook(Long id, Book updatedBook) {
         Optional<Book> existingBook = bookRepository.findById(id);
 
-        if (existingBook.isPresent()) {
-            Book book = existingBook.get();
-
-            book.setIsbn(updatedBook.getIsbn());
-            book.setTitel(updatedBook.getTitel());
-            book.setOmschrijving(updatedBook.getOmschrijving());
-            book.setPrijs(updatedBook.getPrijs());
-            book.setVoorraad(updatedBook.getVoorraad());
-
-            return bookRepository.save(book);
+        if (existingBook.isEmpty()) {
+            return null;
         }
 
-        return null;
+        String isbn = updatedBook.getIsbn();
+
+        if (isbn != null && bookRepository.existsByIsbn(isbn)) {
+            boolean isbnUtiliseParUnAutreLivre = bookRepository.findAll().stream()
+                    .anyMatch(book ->
+                            book.getIsbn().equals(isbn)
+                                    && !book.getId().equals(id)
+                    );
+
+            if (isbnUtiliseParUnAutreLivre) {
+                throw new IllegalArgumentException(
+                        "Dit ISBN is al in gebruik. Kies een ander ISBN."
+                );
+            }
+        }
+
+        Book book = existingBook.get();
+
+        book.setIsbn(updatedBook.getIsbn());
+        book.setTitel(updatedBook.getTitel());
+        book.setOmschrijving(updatedBook.getOmschrijving());
+        book.setPrijs(updatedBook.getPrijs());
+        book.setVoorraad(updatedBook.getVoorraad());
+        book.setAuteurs(laadAuteurs(updatedBook.getAuteurs()));
+
+        return bookRepository.save(book);
     }
     // Een boek verwijderen op basis van het ID
     public boolean deleteBook(Long id) {
@@ -79,5 +111,20 @@ public BookService(BookRepository bookRepository, AuthorRepository authorReposit
         }
 
         return bookRepository.save(book);
+    }
+    private List<Author> laadAuteurs(List<Author> auteurs) {
+        if (auteurs == null || auteurs.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+
+        return auteurs.stream()
+                .map(auteur -> authorRepository.findById(auteur.getId())
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Auteur niet gevonden: " + auteur.getId()
+                                )
+                        ))
+                .distinct()
+                .toList();
     }
 }

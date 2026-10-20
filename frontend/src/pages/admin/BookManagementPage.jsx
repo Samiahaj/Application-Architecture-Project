@@ -25,6 +25,11 @@ function auteursTekst(boek) {
 export default function BookManagementPage() {
     const [boeken, setBoeken] = useState([]);
     const [zoekterm, setZoekterm] = useState('');
+    const [auteurs, setAuteurs] = useState([]);
+    const [auteurZoekterm, setAuteurZoekterm] = useState('');
+    const [nieuweAuteurNaam, setNieuweAuteurNaam] = useState('');
+    const [auteurToevoegen, setAuteurToevoegen] = useState(false);
+    const [nieuwAuteurFormulierOpen, setNieuwAuteurFormulierOpen] = useState(false);
     const [laden, setLaden] = useState(true);
     const [fout, setFout] = useState('');
     const [formulierOpen, setFormulierOpen] = useState(false);
@@ -46,9 +51,118 @@ export default function BookManagementPage() {
             setLaden(false);
         }
     }
+    async function laadAuteurs() {
+        try {
+            const data = await apiFetch('/api/authors');
+            setAuteurs(Array.isArray(data) ? data : []);
+        } catch (error) {
+            setFout(error.message || 'De auteurs konden niet worden geladen.');
+        }
+    }
+    async function voegAuteurToe() {
+        const naam = nieuweAuteurNaam.trim();
 
+        if (!naam) {
+            setFout('Vul de naam van de auteur in.');
+            return;
+        }
+
+        setFout('');
+        setBericht('');
+
+        // Controleer of de auteur al bestaat.
+        const bestaandeAuteur = auteurs.find(
+            (auteur) =>
+                auteur.naam.trim().toLocaleLowerCase('nl') ===
+                naam.toLocaleLowerCase('nl')
+        );
+
+        if (bestaandeAuteur) {
+            setFormulier((vorig) => ({
+                ...vorig,
+                auteurs: vorig.auteurs.includes(bestaandeAuteur.id)
+                    ? vorig.auteurs
+                    : [...vorig.auteurs, bestaandeAuteur.id]
+            }));
+
+            setNieuweAuteurNaam('');
+            setNieuwAuteurFormulierOpen(false);
+            setBericht('Deze auteur bestaat al en is geselecteerd.');
+            return;
+        }
+
+        setAuteurToevoegen(true);
+
+        try {
+            const nieuweAuteur = await apiFetch('/api/authors', {
+                method: 'POST',
+                body: JSON.stringify({ naam })
+            });
+
+            setAuteurs((vorigeAuteurs) => [
+                ...vorigeAuteurs,
+                nieuweAuteur
+            ]);
+
+            setFormulier((vorig) => ({
+                ...vorig,
+                auteurs: vorig.auteurs.includes(nieuweAuteur.id)
+                    ? vorig.auteurs
+                    : [...vorig.auteurs, nieuweAuteur.id]
+            }));
+
+            setNieuweAuteurNaam('');
+            setNieuwAuteurFormulierOpen(false);
+            setAuteurZoekterm('');
+
+            setBericht('De auteur is toegevoegd en geselecteerd.');
+        } catch (error) {
+            setFout(
+                error.message || 'De auteur kon niet worden toegevoegd.'
+            );
+        } finally {
+            setAuteurToevoegen(false);
+        }
+    }
+
+    async function verwijderAuteur(auteur) {
+        const bevestigen = window.confirm(
+            `Weet je zeker dat je de auteur "${auteur.naam}" wilt verwijderen? Deze auteur wordt ook verwijderd uit de gekoppelde boeken.`
+        );
+
+        if (!bevestigen) {
+            return;
+        }
+
+        setFout('');
+        setBericht('');
+
+        try {
+            await apiFetch(`/api/authors/${auteur.id}`, {
+                method: 'DELETE'
+            });
+
+            // Verwijder de auteur uit de lijst.
+            setAuteurs((vorigeAuteurs) =>
+                vorigeAuteurs.filter((item) => item.id !== auteur.id)
+            );
+
+            // Verwijder de auteur ook uit de selectie van het formulier.
+            setFormulier((vorig) => ({
+                ...vorig,
+                auteurs: vorig.auteurs.filter((id) => id !== auteur.id)
+            }));
+
+            setBericht(`De auteur "${auteur.naam}" is verwijderd.`);
+        } catch (error) {
+            setFout(
+                error.message || 'De auteur kon niet worden verwijderd.'
+            );
+        }
+    }
     useEffect(() => {
         laadBoeken();
+        laadAuteurs();
     }, []);
 
     const gefilterdeBoeken = useMemo(() => {
@@ -131,7 +245,9 @@ export default function BookManagementPage() {
             omschrijving: formulier.omschrijving.trim(),
             prijs: Number(formulier.prijs),
             voorraad: Number(formulier.voorraad),
-            auteurs: formulier.auteurs
+            auteurs: formulier.auteurs.map((auteurId) => ({
+                id: auteurId
+            }))
         };
 
         setOpslaan(true);
@@ -281,6 +397,213 @@ export default function BookManagementPage() {
                                 onChange={wijzigVeld}
                                 rows={4}
                             />
+
+                            <label>Auteurs</label>
+
+                            {/* Auteurs déjà sélectionnés */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '8px',
+                                    marginBottom: '12px'
+                                }}
+                            >
+                                {formulier.auteurs.map((auteurId) => {
+                                    const auteur = auteurs.find(
+                                        (item) => item.id === auteurId
+                                    );
+
+                                    if (!auteur) {
+                                        return null;
+                                    }
+
+                                    return (
+                                        <span
+                                            key={auteur.id}
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                padding: '6px 10px',
+                                                borderRadius: '20px',
+                                                background: '#efe4d5'
+                                            }}
+                                        >
+                {auteur.naam}
+
+                                            <button
+                                                type="button"
+                                                aria-label={`Verwijder ${auteur.naam}`}
+                                                onClick={() => {
+                                                    setFormulier((vorig) => ({
+                                                        ...vorig,
+                                                        auteurs: vorig.auteurs.filter(
+                                                            (id) => id !== auteur.id
+                                                        )
+                                                    }));
+                                                }}
+                                                style={{
+                                                    border: 'none',
+                                                    background: 'transparent',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                    ×
+                </button>
+            </span>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Zoeken naar auteurs */}
+                            <input
+                                type="search"
+                                value={auteurZoekterm}
+                                onChange={(event) => setAuteurZoekterm(event.target.value)}
+                                placeholder="Zoek een auteur..."
+                                aria-label="Zoek een auteur"
+                            />
+
+                            {/* Zoekresultaten */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '6px',
+                                    marginTop: '8px',
+                                    marginBottom: '16px'
+                                }}
+                            >
+                                {auteurs
+                                    .filter((auteur) => {
+                                        const naam = auteur.naam.toLocaleLowerCase('nl');
+                                        const zoekterm = auteurZoekterm
+                                            .trim()
+                                            .toLocaleLowerCase('nl');
+
+                                        return (
+                                            !formulier.auteurs.includes(auteur.id) &&
+                                            naam.includes(zoekterm)
+                                        );
+                                    })
+                                    .slice(0, 10)
+                                    .map((auteur) => (
+                                        <div
+                                            key={auteur.id}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormulier((vorig) => ({
+                                                        ...vorig,
+                                                        auteurs: vorig.auteurs.includes(auteur.id)
+                                                            ? vorig.auteurs
+                                                            : [...vorig.auteurs, auteur.id]
+                                                    }));
+
+                                                    setAuteurZoekterm('');
+                                                }}
+                                                style={{
+                                                    flex: 1,
+                                                    textAlign: 'left',
+                                                    padding: '10px 12px',
+                                                    border: '1px solid #e0d5c7',
+                                                    borderRadius: '8px',
+                                                    background: '#fffdf8',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                + {auteur.naam}
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => verwijderAuteur(auteur)}
+                                                aria-label={`Verwijder auteur ${auteur.naam}`}
+                                                title="Auteur verwijderen"
+                                                style={{
+                                                    padding: '10px 12px',
+                                                    border: '1px solid #e0d5c7',
+                                                    borderRadius: '8px',
+                                                    background: '#fffdf8',
+                                                    color: '#b42318',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    ))}
+                            </div>
+
+                            {/* Nieuwe auteur toevoegen */}
+                            {!nieuwAuteurFormulierOpen ? (
+                                <button
+                                    className="button"
+                                    type="button"
+                                    onClick={() => {
+                                        setNieuwAuteurFormulierOpen(true);
+                                        setFout('');
+                                        setBericht('');
+                                    }}
+                                >
+                                    + Nieuwe auteur
+                                </button>
+                            ) : (
+                                <div>
+                                    <label htmlFor="nieuweAuteurNaam">
+                                        Naam van de nieuwe auteur
+                                    </label>
+
+                                    <input
+                                        id="nieuweAuteurNaam"
+                                        type="text"
+                                        value={nieuweAuteurNaam}
+                                        onChange={(event) =>
+                                            setNieuweAuteurNaam(event.target.value)
+                                        }
+                                        placeholder="Naam van de auteur"
+                                    />
+
+                                    <div
+                                        className="profile-actions"
+                                        style={{ marginTop: '10px' }}
+                                    >
+                                        <button
+                                            className="button"
+                                            type="button"
+                                            onClick={voegAuteurToe}
+                                            disabled={auteurToevoegen}
+                                        >
+                                            {auteurToevoegen
+                                                ? 'Toevoegen...'
+                                                : 'Auteur toevoegen'}
+                                        </button>
+
+                                        <button
+                                            className="text-button"
+                                            type="button"
+                                            onClick={() => {
+                                                setNieuwAuteurFormulierOpen(false);
+                                                setNieuweAuteurNaam('');
+                                                setFout('');
+                                            }}
+                                        >
+                                            Annuleren
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+
+
 
                             <label htmlFor="prijs">Prijs (€) *</label>
                             <input
