@@ -60,6 +60,10 @@ public class ReservationService {
 
         return reservationRepository.save(reservation);
     }
+    // Haalt alle reservaties op
+    public List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
+    }
 
     // Haalt alle reservaties van een gebruiker op
     public List<Reservation> getReservationsByUser(Long userId) {

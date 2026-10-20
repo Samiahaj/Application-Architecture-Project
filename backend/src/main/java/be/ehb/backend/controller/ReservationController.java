@@ -26,7 +26,15 @@ public class ReservationController {
         this.reservationService = reservationService;
         this.userRepository = userRepository;
     }
+    // Haalt alle reservaties op voor de beheerder
+    @GetMapping
+    public ResponseEntity<?> getAllReservations(
+            Authentication authentication) {
 
+        return ResponseEntity.ok(
+                reservationService.getAllReservations()
+        );
+    }
     // Maakt een reservatie aan voor de ingelogde gebruiker
     @PostMapping
     public ResponseEntity<?> createReservation(
