@@ -21,6 +21,12 @@ export default function AdminHomePage() {
             link: '/admin/reserveringen',
             symbool: '📋',
         },
+        {
+            titel: 'Commentaarbeheer',
+            beschrijving: 'Bekijk beoordelingen en beantwoord vragen van klanten.',
+            link: '/admin/commentaren',
+            symbool: '💬',
+        },
     ];
 
     return (

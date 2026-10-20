@@ -88,6 +88,26 @@ public class ReviewService {
 
         return reviewRepository.save(review);
     }
+    // Haalt alle beoordelingen op
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
+    }
+    // Slaat het antwoord van de beheerder op
+    @Transactional
+    public Review antwoordOpReview(Long reviewId, String antwoord) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Beoordeling niet gevonden"));
+
+        if (antwoord == null || antwoord.isBlank() || antwoord.length() > 1000) {
+            throw new IllegalArgumentException(
+                    "Het antwoord moet tekst bevatten van maximaal 1000 tekens");
+        }
+
+        review.setAntwoord(antwoord.trim());
+
+        return reviewRepository.save(review);
+    }
 
     // Haalt alle beoordelingen van een boek op
     public List<Review> getReviewsByBook(Long bookId) {

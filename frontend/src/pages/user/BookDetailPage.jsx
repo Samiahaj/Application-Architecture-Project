@@ -416,6 +416,13 @@ export default function BookDetailPage() {
                                     </div>
 
                                     <p>{review.tekst}</p>
+
+                                    {review.antwoord && (
+                                        <div className="review-answer">
+                                            <strong>Reactie van BoekHaven</strong>
+                                            <p>{review.antwoord}</p>
+                                        </div>
+                                    )}
                                 </article>
                             );
                         })}

@@ -63,6 +63,11 @@ public class SecurityConfig {
                                 "/api/authors",
                                 "/api/authors/**"
                         ).permitAll()
+                        // Beoordelingen bekijken is openbaar
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/api/reviews/book/**"
+                        ).permitAll()
 
                         // Alleen beheerders mogen boeken beheren
                         .requestMatchers(

@@ -19,7 +19,7 @@ import AdminHomePage from './pages/admin/AdminHomePage.jsx';
 import UserManagementPage from './pages/admin/UserManagementPage.jsx';
 import BookManagementPage from './pages/admin/BookManagementPage.jsx';
 import ReservationManagementPage from './pages/admin/ReservationManagementPage.jsx';
-
+import CommentManagementPage from './pages/admin/CommentManagementPage.jsx';
 function StartRedirect() {
     const { gebruiker, authLaden } = useAuth();
 
@@ -85,6 +85,10 @@ export default function App() {
                 <Route
                     path="/admin/reserveringen"
                     element={<ReservationManagementPage />}
+                />
+                <Route
+                    path="/admin/commentaren"
+                    element={<CommentManagementPage />}
                 />
             </Route>
 

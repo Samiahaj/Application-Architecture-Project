@@ -32,7 +32,29 @@ public class ReviewController {
         this.reviewService = reviewService;
         this.userRepository = userRepository;
     }
+    // Haalt alle beoordelingen op voor de beheerder
+    @GetMapping
+    public ResponseEntity<?> getAllReviews() {
+        return ResponseEntity.ok(reviewService.getAllReviews());
+    }
+    // Beantwoordt een beoordeling (alleen voor beheerders)
+    @PutMapping("/{reviewId}/answer")
+    public ResponseEntity<?> answerReview(
+            @PathVariable Long reviewId,
+            @RequestBody Map<String, String> body) {
 
+        try {
+            String antwoord = body.get("antwoord");
+
+            Review review = reviewService.antwoordOpReview(reviewId, antwoord);
+
+            return ResponseEntity.ok(review);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("fout", e.getMessage()));
+        }
+    }
     // Maakt een beoordeling voor een opgehaald boek
     @PostMapping
     public ResponseEntity<?> createReview(

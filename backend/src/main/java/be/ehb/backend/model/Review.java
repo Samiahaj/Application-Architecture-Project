@@ -37,10 +37,20 @@ public class Review {
     @Size(max = 1000)
     @Column(nullable = false, length = 1000)
     private String tekst;
+    // Antwoord van de beheerder
+    @Size(max = 1000)
+    @Column(length = 1000)
+    private String antwoord;
 
     public Review() {
     }
+    public String getAntwoord() {
+        return antwoord;
+    }
 
+    public void setAntwoord(String antwoord) {
+        this.antwoord = antwoord;
+    }
     public Long getId() {
         return id;
     }
