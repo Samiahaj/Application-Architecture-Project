@@ -128,6 +128,15 @@ export default function ReservationPage() {
                                             ).toLocaleDateString('nl-BE')
                                             : 'Niet beschikbaar'}
                                     </p>
+                                    <p>
+                                        <strong>Prijs:</strong>{' '}
+                                        {reservering.boek?.prijs != null
+                                            ? Number(reservering.boek.prijs).toLocaleString('nl-BE', {
+                                                style: 'currency',
+                                                currency: 'EUR',
+                                            })
+                                            : 'Niet beschikbaar'}
+                                    </p>
 
                                     <p>
                                         <strong>Status:</strong>{' '}

@@ -170,6 +170,7 @@ export default function ReservationManagementPage() {
                                 <th>Klant</th>
                                 <th>Boek</th>
                                 <th>Datum</th>
+                                <th>Prijs</th>
                                 <th>Status</th>
                                 <th>Status wijzigen</th>
                             </tr>
@@ -204,6 +205,14 @@ export default function ReservationManagementPage() {
                                             : 'Niet beschikbaar'}
                                     </td>
 
+                                    <td>
+                                        {reservering.boek?.prijs != null
+                                            ? new Intl.NumberFormat('nl-BE', {
+                                                style: 'currency',
+                                                currency: 'EUR'
+                                            }).format(reservering.boek.prijs)
+                                            : 'Niet beschikbaar'}
+                                    </td>
                                     <td>
                                         {statussen[reservering.status] ||
                                             reservering.status ||
