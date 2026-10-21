@@ -256,13 +256,9 @@ export default function BookDetailPage() {
 
                 <section className="book-detail">
                     <div className="book-detail-cover">
-                        <p className="eyebrow">
-                            BOEKHAVEN · COLLECTIE
-                        </p>
 
-                        <h1>{boek.titel}</h1>
 
-                        <p>{auteursTekst(boek)}</p>
+
                     </div>
 
                     <div className="book-detail-info">
