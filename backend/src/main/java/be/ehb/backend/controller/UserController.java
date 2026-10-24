@@ -57,6 +57,14 @@ public class UserController {
             HttpServletResponse response) {
 
         try {
+            // 1. Vérifier d'abord si l'utilisateur existe et s'il est bloqué
+            User userCheck = userService.getUserByEmail(loginRequest.getEmail());
+            if (!userCheck.isActief()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Dit account is geblokkeerd door een beheerder.");
+            }
+
+            // 2. Si actif, Spring Security procède à l'authentification normale
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
@@ -78,6 +86,10 @@ public class UserController {
             return ResponseEntity.ok(user);
 
         } catch (Exception e) {
+            // Si le compte est bloqué, on renvoie le message spécifique
+            if (e.getMessage() != null && e.getMessage().contains("geblokkeerd")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("E-mailadres of wachtwoord is onjuist");
         }
@@ -190,28 +202,27 @@ public class UserController {
         }
     }
 
-    // Verwijdert een gebruiker
-    @DeleteMapping("/{id}")
+
+
+    @PutMapping("/{id}/block")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteUser(
-            @PathVariable Long id,
-            Authentication authentication) {
-
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || "anonymousUser".equals(authentication.getName())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("fout", "Je moet ingelogd zijn"));
-        }
-
+    public ResponseEntity<?> blockUser(@PathVariable Long id) {
         try {
-            userService.deleteUser(id, authentication.getName());
+            userService.blokkeerUser(id);
+            return ResponseEntity.ok(Map.of("bericht", "Gebruiker is succesvol geblokkeerd."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("fout", e.getMessage()));
+        }
+    }
 
-            return ResponseEntity.noContent().build();
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("fout", e.getMessage()));
+    @PutMapping("/{id}/unblock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> unblockUser(@PathVariable Long id) {
+        try {
+            userService.deblokkeerUser(id);
+            return ResponseEntity.ok(Map.of("bericht", "Gebruiker is succesvol gedeblokkeerd."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("fout", e.getMessage()));
         }
     }
 }

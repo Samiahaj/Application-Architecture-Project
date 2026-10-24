@@ -36,7 +36,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // Controleert de gegevens bij het inloggen
     public User loginUser(String email, String wachtwoord) {
 
         User user = userRepository.findByEmail(email);
@@ -46,6 +45,12 @@ public class UserService {
                 wachtwoord, user.getWachtwoord())) {
             throw new IllegalArgumentException(
                     "E-mailadres of wachtwoord is onjuist");
+        }
+
+
+        if (!user.isActief()) {
+            throw new IllegalArgumentException(
+                    "Dit account is geblokkeerd door een beheerder.");
         }
 
         return user;
@@ -154,19 +159,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // Verwijdert een gebruiker
-    @Transactional
-    public void deleteUser(Long userId, String currentEmail) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Gebruiker niet gevonden"));
 
-        if (user.getEmail().equalsIgnoreCase(currentEmail)) {
-            throw new IllegalArgumentException(
-                    "Je kunt je eigen account niet verwijderen");
-        }
+    public void blokkeerUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Gebruiker niet gevonden"));
 
-        userRepository.delete(user);
+        user.setActief(false);
+        userRepository.save(user);
+    }
+
+    public void deblokkeerUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Gebruiker niet gevonden"));
+
+        user.setActief(true);
+        userRepository.save(user);
     }
 }

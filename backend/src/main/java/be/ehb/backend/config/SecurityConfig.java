@@ -1,5 +1,9 @@
 package be.ehb.backend.config;
-
+/**
+ * Beveiligingsconfiguratie van de applicatie.
+ * Beheert CORS, CSRF-uitschakeling, sessiebeheer en toegangsrechten
+ * op basis van HTTP-methodes en gebruikersrollen (USER / ADMIN).
+ */
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

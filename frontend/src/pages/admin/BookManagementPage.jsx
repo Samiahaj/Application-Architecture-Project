@@ -503,7 +503,7 @@ export default function BookManagementPage() {
                                                 type="button"
                                                 onClick={() => verwijderBoek(boek)}
                                             >
-                                                Verwijderen
+                                               Verwijderen
                                             </button>
                                         </div>
                                     </td>

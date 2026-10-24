@@ -76,14 +76,10 @@ export default function UserManagementPage() {
         }
     }
 
-    async function verwijderGebruiker(item) {
-        if (String(item.id) === String(gebruiker?.id)) {
-            setFout('Je kunt je eigen account niet verwijderen.');
-            return;
-        }
-
+    async function toggleBlokkeer(item) {
+        const actie = item.actief ? 'blokkeren' : 'deblokkeren';
         const bevestiging = window.confirm(
-            `Weet je zeker dat je het account van ${item.naam} wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`
+            `Weet je zeker dat je het account van ${item.naam} wilt ${actie}?`
         );
 
         if (!bevestiging) {
@@ -94,25 +90,24 @@ export default function UserManagementPage() {
         setFout('');
         setBericht('');
 
+
+        const endpoint = item.actief
+            ? `/api/users/${item.id}/block`
+            : `/api/users/${item.id}/unblock`;
+
         try {
-            await apiFetch(`/api/users/${item.id}`, {
-                method: 'DELETE',
+            await apiFetch(endpoint, {
+                method: 'PUT',
             });
 
-            setGebruikers((huidigeGebruikers) =>
-                huidigeGebruikers.filter(
-                    (gebruikerItem) => gebruikerItem.id !== item.id
-                )
-            );
-
-            setBericht(`Het account van ${item.naam} is verwijderd.`);
+            setBericht(`Het account van ${item.naam} is succesvol ${item.actief ? 'geblokkeerd' : 'gedeblokkeerd'}.`);
+            await laadGebruikers();
         } catch (error) {
-            setFout(error.message || 'Het account kon niet worden verwijderd.');
+            setFout(error.message || 'De actie is mislukt.');
         } finally {
             setBezigMetId(null);
         }
     }
-
     return (
         <PageLayout>
             <main className="dashboard-page">
@@ -201,11 +196,18 @@ export default function UserManagementPage() {
                                     </td>
                                     <td>{item.email}</td>
                                     <td>
-                                            <span
-                                                className={`status-pill ${item.rol === 'ADMIN' ? 'status-collected' : 'status-ready'}`}
-                                            >
-                                                {item.rol === 'ADMIN' ? 'Beheerder' : 'Klant'}
-                                            </span>
+                                        <span
+                                            className="status-pill"
+                                            style={{
+                                                backgroundColor: !item.actief ? '#fee4e2' : undefined,
+                                                color: !item.actief ? '#b42318' : undefined,
+                                                borderColor: !item.actief ? '#fecdca' : undefined
+                                            }}
+                                        >
+                                            {!item.actief
+                                                ? 'Geblokkeerd'
+                                                : (item.rol === 'ADMIN' ? 'Beheerder' : 'Klant')}
+                                        </span>
                                     </td>
                                     <td>
                                         {String(item.id) === String(gebruiker?.id) ? (
@@ -217,7 +219,7 @@ export default function UserManagementPage() {
                                                 <button
                                                     className="button button-outline button-small"
                                                     type="button"
-                                                    disabled={bezigMetId !== null}
+                                                    disabled={bezigMetId !== null || !item.actief}
                                                     onClick={() => wijzigRol(item)}
                                                 >
                                                     {bezigMetId === item.id
@@ -228,12 +230,17 @@ export default function UserManagementPage() {
                                                 </button>
 
                                                 <button
-                                                    className="text-button text-danger"
+                                                    className={`text-button ${item.actief ? 'text-danger' : ''}`}
                                                     type="button"
                                                     disabled={bezigMetId !== null}
-                                                    onClick={() => verwijderGebruiker(item)}
+                                                    style={{ color: item.actief ? '#b42318' : 'var(--green)' }}
+                                                    onClick={() => toggleBlokkeer(item)}
                                                 >
-                                                    Verwijderen
+                                                    {bezigMetId === item.id
+                                                        ? 'Bezig...'
+                                                        : item.actief
+                                                            ? 'Blokkeren'
+                                                            : 'Deblokkeren'}
                                                 </button>
                                             </div>
                                         )}

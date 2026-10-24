@@ -28,9 +28,12 @@ public class User {
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String wachtwoord;
-    // De rol van de gebruiker
+
     @Column(nullable = false)
     private String rol = "USER";
+
+    @Column(nullable = false)
+    private boolean actief = true;
 
     public User() {
     }
@@ -74,6 +77,12 @@ public class User {
     public void setRol(String rol) {
         this.rol = rol;
     }
+    public boolean isActief() {
+        return actief;
+    }
 
+    public void setActief(boolean actief) {
+        this.actief = actief;
+    }
 
 }
