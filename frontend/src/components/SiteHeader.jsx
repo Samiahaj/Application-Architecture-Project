@@ -72,6 +72,9 @@ export default function SiteHeader() {
                             <NavLink to="/admin/reserveringen">
                                 Reserveringen
                             </NavLink>
+                            <NavLink to="/admin/commentaren">
+                                Commentarenbeheer
+                            </NavLink>
                         </>
                     ) : (
                         <NavLink to="/" end>

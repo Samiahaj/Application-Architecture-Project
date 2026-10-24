@@ -9,6 +9,7 @@ const leegBoek = {
     omschrijving: '',
     prijs: '',
     voorraad: '',
+    imageFile: null,
     auteurs: []
 };
 
@@ -16,7 +17,6 @@ function auteursTekst(boek) {
     if (!Array.isArray(boek.auteurs) || boek.auteurs.length === 0) {
         return 'Onbekende auteur';
     }
-
     return boek.auteurs
         .map((auteur) => auteur.naam || 'Onbekende auteur')
         .join(', ');
@@ -41,7 +41,6 @@ export default function BookManagementPage() {
     async function laadBoeken() {
         setLaden(true);
         setFout('');
-
         try {
             const data = await apiFetch('/api/books');
             setBoeken(Array.isArray(data) ? data : []);
@@ -51,6 +50,7 @@ export default function BookManagementPage() {
             setLaden(false);
         }
     }
+
     async function laadAuteurs() {
         try {
             const data = await apiFetch('/api/authors');
@@ -59,9 +59,9 @@ export default function BookManagementPage() {
             setFout(error.message || 'De auteurs konden niet worden geladen.');
         }
     }
+
     async function voegAuteurToe() {
         const naam = nieuweAuteurNaam.trim();
-
         if (!naam) {
             setFout('Vul de naam van de auteur in.');
             return;
@@ -70,11 +70,8 @@ export default function BookManagementPage() {
         setFout('');
         setBericht('');
 
-        // Controleer of de auteur al bestaat.
         const bestaandeAuteur = auteurs.find(
-            (auteur) =>
-                auteur.naam.trim().toLocaleLowerCase('nl') ===
-                naam.toLocaleLowerCase('nl')
+            (auteur) => auteur.naam.trim().toLocaleLowerCase('nl') === naam.toLocaleLowerCase('nl')
         );
 
         if (bestaandeAuteur) {
@@ -84,7 +81,6 @@ export default function BookManagementPage() {
                     ? vorig.auteurs
                     : [...vorig.auteurs, bestaandeAuteur.id]
             }));
-
             setNieuweAuteurNaam('');
             setNieuwAuteurFormulierOpen(false);
             setBericht('Deze auteur bestaat al en is geselecteerd.');
@@ -92,18 +88,13 @@ export default function BookManagementPage() {
         }
 
         setAuteurToevoegen(true);
-
         try {
             const nieuweAuteur = await apiFetch('/api/authors', {
                 method: 'POST',
                 body: JSON.stringify({ naam })
             });
 
-            setAuteurs((vorigeAuteurs) => [
-                ...vorigeAuteurs,
-                nieuweAuteur
-            ]);
-
+            setAuteurs((vorigeAuteurs) => [...vorigeAuteurs, nieuweAuteur]);
             setFormulier((vorig) => ({
                 ...vorig,
                 auteurs: vorig.auteurs.includes(nieuweAuteur.id)
@@ -114,12 +105,9 @@ export default function BookManagementPage() {
             setNieuweAuteurNaam('');
             setNieuwAuteurFormulierOpen(false);
             setAuteurZoekterm('');
-
             setBericht('De auteur is toegevoegd en geselecteerd.');
         } catch (error) {
-            setFout(
-                error.message || 'De auteur kon niet worden toegevoegd.'
-            );
+            setFout(error.message || 'De auteur kon niet worden toegevoegd.');
         } finally {
             setAuteurToevoegen(false);
         }
@@ -130,36 +118,24 @@ export default function BookManagementPage() {
             `Weet je zeker dat je de auteur "${auteur.naam}" wilt verwijderen? Deze auteur wordt ook verwijderd uit de gekoppelde boeken.`
         );
 
-        if (!bevestigen) {
-            return;
-        }
+        if (!bevestigen) return;
 
         setFout('');
         setBericht('');
 
         try {
-            await apiFetch(`/api/authors/${auteur.id}`, {
-                method: 'DELETE'
-            });
-
-            // Verwijder de auteur uit de lijst.
-            setAuteurs((vorigeAuteurs) =>
-                vorigeAuteurs.filter((item) => item.id !== auteur.id)
-            );
-
-            // Verwijder de auteur ook uit de selectie van het formulier.
+            await apiFetch(`/api/authors/${auteur.id}`, { method: 'DELETE' });
+            setAuteurs((vorigeAuteurs) => vorigeAuteurs.filter((item) => item.id !== auteur.id));
             setFormulier((vorig) => ({
                 ...vorig,
                 auteurs: vorig.auteurs.filter((id) => id !== auteur.id)
             }));
-
             setBericht(`De auteur "${auteur.naam}" is verwijderd.`);
         } catch (error) {
-            setFout(
-                error.message || 'De auteur kon niet worden verwijderd.'
-            );
+            setFout(error.message || 'De auteur kon niet worden verwijderd.');
         }
     }
+
     useEffect(() => {
         laadBoeken();
         laadAuteurs();
@@ -167,10 +143,7 @@ export default function BookManagementPage() {
 
     const gefilterdeBoeken = useMemo(() => {
         const term = zoekterm.trim().toLocaleLowerCase('nl');
-
-        if (!term) {
-            return boeken;
-        }
+        if (!term) return boeken;
 
         return boeken.filter((boek) =>
             `${boek.titel || ''} ${boek.isbn || ''} ${auteursTekst(boek)}`
@@ -181,11 +154,7 @@ export default function BookManagementPage() {
 
     function wijzigVeld(event) {
         const { name, value } = event.target;
-
-        setFormulier((vorig) => ({
-            ...vorig,
-            [name]: value
-        }));
+        setFormulier((vorig) => ({ ...vorig, [name]: value }));
     }
 
     function openNieuwBoek() {
@@ -194,25 +163,24 @@ export default function BookManagementPage() {
         setFormulierOpen(true);
         setBericht('');
         setFout('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function openBewerken(boek) {
         setBewerkenId(boek.id);
-
         setFormulier({
             isbn: boek.isbn || '',
             titel: boek.titel || '',
             omschrijving: boek.omschrijving || '',
             prijs: boek.prijs ?? '',
             voorraad: boek.voorraad ?? '',
-            auteurs: Array.isArray(boek.auteurs)
-                ? boek.auteurs.map((auteur) => auteur.id)
-                : []
+            imageFile: null,
+            auteurs: Array.isArray(boek.auteurs) ? boek.auteurs.map((auteur) => auteur.id) : []
         });
-
         setFormulierOpen(true);
         setBericht('');
         setFout('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function verstuurFormulier(event) {
@@ -230,91 +198,76 @@ export default function BookManagementPage() {
             return;
         }
 
-        if (
-            formulier.voorraad === '' ||
-            !Number.isInteger(Number(formulier.voorraad)) ||
-            Number(formulier.voorraad) < 0
-        ) {
+        if (formulier.voorraad === '' || !Number.isInteger(Number(formulier.voorraad)) || Number(formulier.voorraad) < 0) {
             setFout('Vul een geldige voorraad in.');
             return;
         }
 
-        const boekData = {
-            isbn: formulier.isbn.trim(),
-            titel: formulier.titel.trim(),
-            omschrijving: formulier.omschrijving.trim(),
-            prijs: Number(formulier.prijs),
-            voorraad: Number(formulier.voorraad),
-            auteurs: formulier.auteurs.map((auteurId) => ({
-                id: auteurId
-            }))
-        };
+        // Utilisation de FormData pour envoyer le fichier du PC
+        const formData = new FormData();
+        formData.append('isbn', formulier.isbn.trim());
+        formData.append('titel', formulier.titel.trim());
+        formData.append('omschrijving', formulier.omschrijving.trim());
+        formData.append('prijs', formulier.prijs);
+        formData.append('voorraad', formulier.voorraad);
+
+        if (formulier.imageFile) {
+            formData.append('image', formulier.imageFile);
+        }
+
+        formulier.auteurs.forEach((auteurId) => {
+            formData.append('auteurIds', auteurId);
+        });
 
         setOpslaan(true);
 
         try {
+            // Note: Ton apiFetch ne doit pas forcer Content-Type: application/json si le body est un FormData
             if (bewerkenId !== null) {
                 await apiFetch(`/api/books/${bewerkenId}`, {
                     method: 'PUT',
-                    body: JSON.stringify(boekData)
+                    body: formData
                 });
-
                 setBericht('Het boek is bijgewerkt.');
             } else {
                 await apiFetch('/api/books', {
                     method: 'POST',
-                    body: JSON.stringify(boekData)
+                    body: formData
                 });
-
                 setBericht('Het boek is toegevoegd.');
             }
 
             setFormulierOpen(false);
             setFormulier(leegBoek);
             setBewerkenId(null);
-
             await laadBoeken();
         } catch (error) {
-            setFout(
-                error.message ||
-                'Het boek kon niet worden opgeslagen.'
-            );
+            setFout(error.message || 'Het boek kon niet worden opgeslagen.');
         } finally {
             setOpslaan(false);
         }
     }
 
     async function verwijderBoek(boek) {
-        const bevestigen = window.confirm(
-            `Weet je zeker dat je "${boek.titel}" wilt verwijderen?`
-        );
-
-        if (!bevestigen) {
-            return;
-        }
+        const bevestigen = window.confirm(`Weet je zeker dat je "${boek.titel}" wilt verwijderen?`);
+        if (!bevestigen) return;
 
         setFout('');
         setBericht('');
 
         try {
-            await apiFetch(`/api/books/${boek.id}`, {
-                method: 'DELETE'
-            });
-
+            await apiFetch(`/api/books/${boek.id}`, { method: 'DELETE' });
             setBericht('Het boek is verwijderd.');
             await laadBoeken();
         } catch (error) {
-            setFout(
-                error.message ||
-                'Het boek kon niet worden verwijderd.'
-            );
+            setFout(error.message || 'Het boek kon niet worden verwijderd.');
         }
     }
 
     return (
         <PageLayout>
             <main className="dashboard-page">
-                <section className="section-heading">
+                <section className="dashboard-heading">
                     <div>
                         <p className="eyebrow">BOEKHAVEN · BEHEER</p>
                         <h1>Boekenbeheer</h1>
@@ -323,330 +276,163 @@ export default function BookManagementPage() {
                         </p>
                     </div>
 
-                    <button
-                        className="button"
-                        type="button"
-                        onClick={openNieuwBoek}
-                    >
-                        + Nieuw boek
+                    <button className="button" type="button" onClick={openNieuwBoek}>
+                        Nieuw boek toevoegen
                     </button>
                 </section>
 
-                <p>
+                <div style={{ marginBottom: '35px' }}>
                     <Link className="text-link" to="/admin">
                         ← Terug naar het dashboard
                     </Link>
-                </p>
+                </div>
 
-                {bericht && (
-                    <div className="status-message">
-                        {bericht}
-                    </div>
-                )}
-
-                {fout && (
-                    <div className="alert alert-error">
-                        {fout}
-                    </div>
-                )}
+                {bericht && <div className="alert alert-success slide-in">{bericht}</div>}
+                {fout && <div className="alert alert-error slide-in">{fout}</div>}
 
                 {formulierOpen && (
-                    <section className="profile-action-card">
-                        <div>
-                            <p className="eyebrow">
-                                {bewerkenId !== null
-                                    ? 'BOEK AANPASSEN'
-                                    : 'NIEUW BOEK'}
-                            </p>
-
-                            <h2>
-                                {bewerkenId !== null
-                                    ? 'Boek bewerken'
-                                    : 'Boek toevoegen'}
-                            </h2>
+                    <section className="panel form-panel slide-in">
+                        <div className="panel-heading">
+                            <div>
+                                <p className="eyebrow">
+                                    {bewerkenId !== null ? 'BOEK AANPASSEN' : 'NIEUW BOEK'}
+                                </p>
+                                <h2>{bewerkenId !== null ? 'Boek bewerken' : 'Boek toevoegen'}</h2>
+                            </div>
                         </div>
 
-                        <form
-                            className="review-form"
-                            onSubmit={verstuurFormulier}
-                        >
-                            <label htmlFor="isbn">ISBN</label>
-                            <input
-                                id="isbn"
-                                name="isbn"
-                                value={formulier.isbn}
-                                onChange={wijzigVeld}
-                            />
+                        <form className="form-stack" onSubmit={verstuurFormulier}>
+                            <div className="form-grid">
+                                <div>
+                                    <label htmlFor="isbn">ISBN</label>
+                                    <input id="isbn" name="isbn" value={formulier.isbn} onChange={wijzigVeld} />
+                                </div>
+                                <div>
+                                    <label htmlFor="titel">Titel *</label>
+                                    <input id="titel" name="titel" value={formulier.titel} onChange={wijzigVeld} required />
+                                </div>
+                            </div>
 
-                            <label htmlFor="titel">Titel *</label>
-                            <input
-                                id="titel"
-                                name="titel"
-                                value={formulier.titel}
-                                onChange={wijzigVeld}
-                                required
-                            />
+                            <label htmlFor="omschrijving">Beschrijving</label>
+                            <textarea id="omschrijving" name="omschrijving" value={formulier.omschrijving} onChange={wijzigVeld} rows={3} />
 
-                            <label htmlFor="omschrijving">
-                                Beschrijving
-                            </label>
-                            <textarea
-                                id="omschrijving"
-                                name="omschrijving"
-                                value={formulier.omschrijving}
-                                onChange={wijzigVeld}
-                                rows={4}
+                            <label htmlFor="imageFile">Boekomslag (Afbeelding vanaf PC)</label>
+                            <input
+                                id="imageFile"
+                                type="file"
+                                accept="image/*"
+                                onChange={(event) => {
+                                    const bestand = event.target.files[0];
+                                    setFormulier((vorig) => ({ ...vorig, imageFile: bestand }));
+                                }}
                             />
 
                             <label>Auteurs</label>
-
-                            {/* Auteurs déjà sélectionnés */}
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '8px',
-                                    marginBottom: '12px'
-                                }}
-                            >
+                            <div className="author-tags-container">
                                 {formulier.auteurs.map((auteurId) => {
-                                    const auteur = auteurs.find(
-                                        (item) => item.id === auteurId
-                                    );
-
-                                    if (!auteur) {
-                                        return null;
-                                    }
-
+                                    const auteur = auteurs.find((item) => item.id === auteurId);
+                                    if (!auteur) return null;
                                     return (
-                                        <span
-                                            key={auteur.id}
-                                            style={{
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                padding: '6px 10px',
-                                                borderRadius: '20px',
-                                                background: '#efe4d5'
-                                            }}
-                                        >
-                {auteur.naam}
-
+                                        <span key={auteur.id} className="author-tag">
+                                            {auteur.naam}
                                             <button
                                                 type="button"
-                                                aria-label={`Verwijder ${auteur.naam}`}
-                                                onClick={() => {
-                                                    setFormulier((vorig) => ({
-                                                        ...vorig,
-                                                        auteurs: vorig.auteurs.filter(
-                                                            (id) => id !== auteur.id
-                                                        )
-                                                    }));
-                                                }}
-                                                style={{
-                                                    border: 'none',
-                                                    background: 'transparent',
-                                                    cursor: 'pointer',
-                                                    fontWeight: 'bold'
-                                                }}
+                                                className="author-tag-remove"
+                                                onClick={() => setFormulier((vorig) => ({
+                                                    ...vorig,
+                                                    auteurs: vorig.auteurs.filter((id) => id !== auteur.id)
+                                                }))}
                                             >
-                    ×
-                </button>
-            </span>
+                                                Sluiten
+                                            </button>
+                                        </span>
                                     );
                                 })}
                             </div>
 
-                            {/* Zoeken naar auteurs */}
                             <input
                                 type="search"
                                 value={auteurZoekterm}
                                 onChange={(event) => setAuteurZoekterm(event.target.value)}
-                                placeholder="Zoek een auteur..."
-                                aria-label="Zoek een auteur"
+                                placeholder="Zoek of typ de naam van een auteur..."
+                                className="author-search-input"
                             />
 
-                            {/* Zoekresultaten */}
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '6px',
-                                    marginTop: '8px',
-                                    marginBottom: '16px'
-                                }}
-                            >
+                            <div className="author-search-results">
                                 {auteurs
                                     .filter((auteur) => {
                                         const naam = auteur.naam.toLocaleLowerCase('nl');
-                                        const zoekterm = auteurZoekterm
-                                            .trim()
-                                            .toLocaleLowerCase('nl');
-
-                                        return (
-                                            !formulier.auteurs.includes(auteur.id) &&
-                                            naam.includes(zoekterm)
-                                        );
+                                        const zoekterm = auteurZoekterm.trim().toLocaleLowerCase('nl');
+                                        return !formulier.auteurs.includes(auteur.id) && naam.includes(zoekterm);
                                     })
-                                    .slice(0, 10)
+                                    .slice(0, 5)
                                     .map((auteur) => (
-                                        <div
-                                            key={auteur.id}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px'
-                                            }}
-                                        >
+                                        <div key={auteur.id} className="author-result-item">
                                             <button
                                                 type="button"
+                                                className="author-add-btn"
                                                 onClick={() => {
                                                     setFormulier((vorig) => ({
                                                         ...vorig,
-                                                        auteurs: vorig.auteurs.includes(auteur.id)
-                                                            ? vorig.auteurs
-                                                            : [...vorig.auteurs, auteur.id]
+                                                        auteurs: vorig.auteurs.includes(auteur.id) ? vorig.auteurs : [...vorig.auteurs, auteur.id]
                                                     }));
-
                                                     setAuteurZoekterm('');
-                                                }}
-                                                style={{
-                                                    flex: 1,
-                                                    textAlign: 'left',
-                                                    padding: '10px 12px',
-                                                    border: '1px solid #e0d5c7',
-                                                    borderRadius: '8px',
-                                                    background: '#fffdf8',
-                                                    cursor: 'pointer'
                                                 }}
                                             >
                                                 + {auteur.naam}
                                             </button>
-
                                             <button
                                                 type="button"
+                                                className="author-delete-btn"
                                                 onClick={() => verwijderAuteur(auteur)}
-                                                aria-label={`Verwijder auteur ${auteur.naam}`}
-                                                title="Auteur verwijderen"
-                                                style={{
-                                                    padding: '10px 12px',
-                                                    border: '1px solid #e0d5c7',
-                                                    borderRadius: '8px',
-                                                    background: '#fffdf8',
-                                                    color: '#b42318',
-                                                    cursor: 'pointer'
-                                                }}
                                             >
-                                                🗑️
+                                                Verwijder
                                             </button>
                                         </div>
                                     ))}
                             </div>
 
-                            {/* Nieuwe auteur toevoegen */}
                             {!nieuwAuteurFormulierOpen ? (
-                                <button
-                                    className="button"
-                                    type="button"
-                                    onClick={() => {
-                                        setNieuwAuteurFormulierOpen(true);
-                                        setFout('');
-                                        setBericht('');
-                                    }}
-                                >
-                                    + Nieuwe auteur
+                                <button className="text-button" type="button" onClick={() => setNieuwAuteurFormulierOpen(true)}>
+                                    + Nieuwe auteur aanmaken
                                 </button>
                             ) : (
-                                <div>
-                                    <label htmlFor="nieuweAuteurNaam">
-                                        Naam van de nieuwe auteur
-                                    </label>
-
+                                <div className="new-author-box">
+                                    <label htmlFor="nieuweAuteurNaam">Naam van de nieuwe auteur</label>
                                     <input
                                         id="nieuweAuteurNaam"
                                         type="text"
                                         value={nieuweAuteurNaam}
-                                        onChange={(event) =>
-                                            setNieuweAuteurNaam(event.target.value)
-                                        }
-                                        placeholder="Naam van de auteur"
+                                        onChange={(event) => setNieuweAuteurNaam(event.target.value)}
+                                        placeholder="Bijv. J.K. Rowling"
                                     />
-
-                                    <div
-                                        className="profile-actions"
-                                        style={{ marginTop: '10px' }}
-                                    >
-                                        <button
-                                            className="button"
-                                            type="button"
-                                            onClick={voegAuteurToe}
-                                            disabled={auteurToevoegen}
-                                        >
-                                            {auteurToevoegen
-                                                ? 'Toevoegen...'
-                                                : 'Auteur toevoegen'}
+                                    <div className="form-actions-inline">
+                                        <button className="button button-small" type="button" onClick={voegAuteurToe} disabled={auteurToevoegen}>
+                                            {auteurToevoegen ? 'Bezig...' : 'Opslaan'}
                                         </button>
-
-                                        <button
-                                            className="text-button"
-                                            type="button"
-                                            onClick={() => {
-                                                setNieuwAuteurFormulierOpen(false);
-                                                setNieuweAuteurNaam('');
-                                                setFout('');
-                                            }}
-                                        >
+                                        <button className="text-button" type="button" onClick={() => setNieuwAuteurFormulierOpen(false)}>
                                             Annuleren
                                         </button>
                                     </div>
                                 </div>
                             )}
 
+                            <div className="form-grid">
+                                <div>
+                                    <label htmlFor="prijs">Prijs (€) *</label>
+                                    <input id="prijs" name="prijs" type="number" min="0" step="0.01" value={formulier.prijs} onChange={wijzigVeld} required />
+                                </div>
+                                <div>
+                                    <label htmlFor="voorraad">Voorraad *</label>
+                                    <input id="voorraad" name="voorraad" type="number" min="0" step="1" value={formulier.voorraad} onChange={wijzigVeld} required />
+                                </div>
+                            </div>
 
-
-
-                            <label htmlFor="prijs">Prijs (€) *</label>
-                            <input
-                                id="prijs"
-                                name="prijs"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={formulier.prijs}
-                                onChange={wijzigVeld}
-                                required
-                            />
-
-                            <label htmlFor="voorraad">
-                                Voorraad *
-                            </label>
-                            <input
-                                id="voorraad"
-                                name="voorraad"
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={formulier.voorraad}
-                                onChange={wijzigVeld}
-                                required
-                            />
-
-                            <div className="profile-actions">
-                                <button
-                                    className="button"
-                                    type="submit"
-                                    disabled={opslaan}
-                                >
-                                    {opslaan
-                                        ? 'Opslaan...'
-                                        : 'Opslaan'}
+                            <div className="form-actions" style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '20px' }}>
+                                <button className="button" type="submit" disabled={opslaan}>
+                                    {opslaan ? 'Bezig met opslaan...' : 'Boek opslaan'}
                                 </button>
-
-                                <button
-                                    className="text-button"
-                                    type="button"
-                                    onClick={() => setFormulierOpen(false)}
-                                >
+                                <button className="button button-outline" type="button" onClick={() => setFormulierOpen(false)}>
                                     Annuleren
                                 </button>
                             </div>
@@ -654,39 +440,29 @@ export default function BookManagementPage() {
                     </section>
                 )}
 
-                <section className="profile-action-card">
-                    <div>
-                        <h2>Collectie</h2>
-                        <p>Zoek en beheer bestaande boeken.</p>
-                    </div>
-
+                <section className="search-section">
                     <label className="search-box">
                         <span aria-hidden="true">⌕</span>
                         <input
                             type="search"
                             value={zoekterm}
                             onChange={(event) => setZoekterm(event.target.value)}
-                            placeholder="Zoek op titel, ISBN of auteur..."
-                            aria-label="Zoek boeken"
+                            placeholder="Zoek in de collectie op titel, ISBN of auteur..."
                         />
                     </label>
                 </section>
 
-                {laden && (
-                    <p className="status-message">
-                        De boeken worden geladen...
-                    </p>
-                )}
+                {laden && <p className="status-message fade-in">Collectie wordt geladen...</p>}
 
                 {!laden && !fout && gefilterdeBoeken.length === 0 && (
-                    <div className="empty-state">
+                    <div className="empty-state fade-in">
                         <h3>Geen boeken gevonden</h3>
-                        <p>Probeer een andere zoekterm.</p>
+                        <p>Probeer een andere zoekterm of voeg een nieuw boek toe.</p>
                     </div>
                 )}
 
-                {!laden && gefilterdeBoeken.length > 0 && (
-                    <div className="table-container">
+                {!laden && gefilterdeBoeken.length > 0 &&/table-container fade-in/.test("table-container fade-in") && (
+                    <div className="table-container fade-in">
                         <table className="management-table">
                             <thead>
                             <tr>
@@ -697,34 +473,33 @@ export default function BookManagementPage() {
                                 <th>Acties</th>
                             </tr>
                             </thead>
-
                             <tbody>
                             {gefilterdeBoeken.map((boek) => (
                                 <tr key={boek.id}>
                                     <td>{boek.titel}</td>
                                     <td>{auteursTekst(boek)}</td>
                                     <td>
-                                        {Number(boek.prijs).toLocaleString(
-                                            'nl-BE',
-                                            {
-                                                style: 'currency',
-                                                currency: 'EUR'
-                                            }
-                                        )}
+                                        {Number(boek.prijs).toLocaleString('nl-BE', {
+                                            style: 'currency',
+                                            currency: 'EUR'
+                                        })}
                                     </td>
-                                    <td>{boek.voorraad ?? 0}</td>
                                     <td>
-                                        <div className="profile-actions">
+                                            <span style={{ color: boek.voorraad > 0 ? 'var(--green)' : '#b42318', fontWeight: 600 }}>
+                                                {boek.voorraad}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
                                             <button
-                                                className="text-button"
+                                                className="button button-outline button-small"
                                                 type="button"
                                                 onClick={() => openBewerken(boek)}
                                             >
                                                 Bewerken
                                             </button>
-
                                             <button
-                                                className="text-button"
+                                                className="text-button text-danger"
                                                 type="button"
                                                 onClick={() => verwijderBoek(boek)}
                                             >

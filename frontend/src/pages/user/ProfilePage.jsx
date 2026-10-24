@@ -83,14 +83,13 @@ export default function ProfilePage() {
 
             setProfiel(data);
 
-            // Werkt de gebruiker in de applicatie bij als de context dit ondersteunt.
             if (typeof setGebruiker === 'function') {
                 setGebruiker(data);
             }
 
             setNaam(data.naam || '');
             setEmail(data.email || '');
-            setBericht('Je persoonlijke gegevens zijn bijgewerkt.');
+            setBericht('Je persoonlijke gegevens zijn succesvol bijgewerkt.');
         } catch (error) {
             setFout(
                 error.message ||
@@ -151,8 +150,8 @@ export default function ProfilePage() {
 
     return (
         <PageLayout>
-            <main className="dashboard-page profile-page">
-                <section className="section-heading">
+            <main className="dashboard-page profile-page fade-in">
+                <section className="dashboard-heading">
                     <div>
                         <p className="eyebrow">BOEKHAVEN · MIJN ACCOUNT</p>
                         <h1>Mijn profiel</h1>
@@ -163,30 +162,28 @@ export default function ProfilePage() {
                 </section>
 
                 {laden && (
-                    <p className="status-message">
+                    <p className="status-message fade-in">
                         Je profiel wordt geladen...
                     </p>
                 )}
 
                 {!laden && fout && (
-                    <div className="alert alert-error" role="alert">
+                    <div className="alert alert-error slide-in" role="alert">
                         {fout}
                     </div>
                 )}
 
                 {!laden && bericht && (
-                    <div className="alert alert-success" role="status">
+                    <div className="alert alert-success slide-in" role="status">
                         {bericht}
                     </div>
                 )}
 
                 {!laden && gebruikerData && (
                     <>
-                        <section className="profile-card">
+                        <section className="profile-card slide-in" style={{ animationDelay: '0.1s' }}>
                             <div className="profile-avatar" aria-hidden="true">
-                                {naam
-                                    ? naam.charAt(0).toUpperCase()
-                                    : '?'}
+                                {naam ? naam.charAt(0).toUpperCase() : '?'}
                             </div>
 
                             <div className="profile-information">
@@ -204,148 +201,134 @@ export default function ProfilePage() {
 
                                 <div className="profile-field">
                                     <span>Accounttype</span>
-                                    <strong>
-                                        {gebruikerData.rol === 'ADMIN'
-                                            ? 'Beheerder'
-                                            : 'Klant'}
-                                    </strong>
+                                    <span className="status-pill status-ready" style={{ display: 'inline-flex', width: 'fit-content' }}>
+                                        {gebruikerData.rol === 'ADMIN' ? 'Beheerder' : 'Klant'}
+                                    </span>
                                 </div>
                             </div>
                         </section>
 
-                        <section className="profile-action-card">
-                            <div>
-                                <p className="eyebrow">ACCOUNT BEHEREN</p>
-                                <h2>Persoonlijke gegevens wijzigen</h2>
-                                <p>Pas je naam of e-mailadres aan.</p>
-                            </div>
-
-                            <form onSubmit={bewaarProfiel}>
-                                <div className="form-group">
-                                    <label htmlFor="profiel-naam">Naam</label>
-                                    <input
-                                        id="profiel-naam"
-                                        type="text"
-                                        value={naam}
-                                        onChange={(event) => setNaam(event.target.value)}
-                                        required
-                                    />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', margin: '30px 0' }}>
+                            <section className="panel slide-in" style={{ animationDelay: '0.2s', margin: 0 }}>
+                                <div className="panel-heading" style={{ marginBottom: '20px' }}>
+                                    <p className="eyebrow">ACCOUNT BEHEREN</p>
+                                    <h2>Gegevens wijzigen</h2>
+                                    <p className="section-description">Pas je naam of e-mailadres aan.</p>
                                 </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="profiel-email">E-mailadres</label>
-                                    <input
-                                        id="profiel-email"
-                                        type="email"
-                                        value={email}
-                                        onChange={(event) => setEmail(event.target.value)}
-                                        required
-                                    />
+                                <form onSubmit={bewaarProfiel} className="form-stack">
+                                    <div className="form-group">
+                                        <label htmlFor="profiel-naam">Naam</label>
+                                        <input
+                                            id="profiel-naam"
+                                            type="text"
+                                            value={naam}
+                                            onChange={(event) => setNaam(event.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="profiel-email">E-mailadres</label>
+                                        <input
+                                            id="profiel-email"
+                                            type="email"
+                                            value={email}
+                                            onChange={(event) => setEmail(event.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <button
+                                        className="button"
+                                        type="submit"
+                                        disabled={profielOpslaan}
+                                        style={{ marginTop: '10px' }}
+                                    >
+                                        {profielOpslaan ? 'Opslaan...' : 'Gegevens opslaan'}
+                                    </button>
+                                </form>
+                            </section>
+
+                            <section className="panel slide-in" style={{ animationDelay: '0.3s', margin: 0 }}>
+                                <div className="panel-heading" style={{ marginBottom: '20px' }}>
+                                    <p className="eyebrow">BEVEILIGING</p>
+                                    <h2>Wachtwoord wijzigen</h2>
+                                    <p className="section-description">Stel een nieuw beveiligd wachtwoord in.</p>
                                 </div>
 
-                                <button
-                                    className="button"
-                                    type="submit"
-                                    disabled={profielOpslaan}
-                                >
-                                    {profielOpslaan
-                                        ? 'Opslaan...'
-                                        : 'Gegevens opslaan'}
-                                </button>
-                            </form>
-                        </section>
+                                <form onSubmit={bewaarWachtwoord} className="form-stack">
+                                    <div className="form-group">
+                                        <label htmlFor="oud-wachtwoord">Huidig wachtwoord</label>
+                                        <input
+                                            id="oud-wachtwoord"
+                                            type="password"
+                                            autoComplete="current-password"
+                                            value={oudWachtwoord}
+                                            onChange={(event) => setOudWachtwoord(event.target.value)}
+                                            required
+                                        />
+                                    </div>
 
-                        <section className="profile-action-card">
-                            <div>
-                                <p className="eyebrow">BEVEILIGING</p>
-                                <h2>Wachtwoord wijzigen</h2>
-                                <p>
-                                    Gebruik je huidige wachtwoord om een nieuw wachtwoord in te stellen.
-                                </p>
-                            </div>
+                                    <div className="form-group">
+                                        <label htmlFor="nieuw-wachtwoord">Nieuw wachtwoord</label>
+                                        <input
+                                            id="nieuw-wachtwoord"
+                                            type="password"
+                                            autoComplete="new-password"
+                                            value={nieuwWachtwoord}
+                                            onChange={(event) => setNieuwWachtwoord(event.target.value)}
+                                            minLength={8}
+                                            required
+                                        />
+                                    </div>
 
-                            <form onSubmit={bewaarWachtwoord}>
-                                <div className="form-group">
-                                    <label htmlFor="oud-wachtwoord">
-                                        Huidig wachtwoord
-                                    </label>
-                                    <input
-                                        id="oud-wachtwoord"
-                                        type="password"
-                                        autoComplete="current-password"
-                                        value={oudWachtwoord}
-                                        onChange={(event) => setOudWachtwoord(event.target.value)}
-                                        required
-                                    />
-                                </div>
+                                    <div className="form-group">
+                                        <label htmlFor="herhaal-wachtwoord">Herhaal wachtwoord</label>
+                                        <input
+                                            id="herhaal-wachtwoord"
+                                            type="password"
+                                            autoComplete="new-password"
+                                            value={herhaalWachtwoord}
+                                            onChange={(event) => setHerhaalWachtwoord(event.target.value)}
+                                            minLength={8}
+                                            required
+                                        />
+                                    </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="nieuw-wachtwoord">
-                                        Nieuw wachtwoord
-                                    </label>
-                                    <input
-                                        id="nieuw-wachtwoord"
-                                        type="password"
-                                        autoComplete="new-password"
-                                        value={nieuwWachtwoord}
-                                        onChange={(event) => setNieuwWachtwoord(event.target.value)}
-                                        minLength={8}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="herhaal-wachtwoord">
-                                        Herhaal nieuw wachtwoord
-                                    </label>
-                                    <input
-                                        id="herhaal-wachtwoord"
-                                        type="password"
-                                        autoComplete="new-password"
-                                        value={herhaalWachtwoord}
-                                        onChange={(event) => setHerhaalWachtwoord(event.target.value)}
-                                        minLength={8}
-                                        required
-                                    />
-                                </div>
-
-                                <button
-                                    className="button"
-                                    type="submit"
-                                    disabled={wachtwoordOpslaan}
-                                >
-                                    {wachtwoordOpslaan
-                                        ? 'Opslaan...'
-                                        : 'Wachtwoord wijzigen'}
-                                </button>
-                            </form>
-                        </section>
+                                    <button
+                                        className="button"
+                                        type="submit"
+                                        disabled={wachtwoordOpslaan}
+                                        style={{ marginTop: '10px' }}
+                                    >
+                                        {wachtwoordOpslaan ? 'Opslaan...' : 'Wachtwoord wijzigen'}
+                                    </button>
+                                </form>
+                            </section>
+                        </div>
                     </>
                 )}
 
-                <section className="profile-actions">
-                    <article className="profile-action-card">
+                <section className="profile-actions slide-in" style={{ animationDelay: '0.4s', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '40px' }}>
+                    <article className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div>
                             <p className="eyebrow">JOUW BOEKEN</p>
                             <h2>Mijn reserveringen</h2>
-                            <p>Bekijk je reserveringen en volg hun status.</p>
+                            <p className="section-description" style={{ marginBottom: '20px' }}>Bekijk je actieve reserveringen en volg hun status.</p>
                         </div>
-
-                        <Link className="button" to="/mijn-reserveringen">
+                        <Link className="button button-outline" to="/mijn-reserveringen" style={{ alignSelf: 'flex-start' }}>
                             Bekijk reserveringen →
                         </Link>
                     </article>
 
-                    <article className="profile-action-card">
+                    <article className="panel" style={{ margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div>
                             <p className="eyebrow">ONTDEK MEER</p>
                             <h2>Onze collectie</h2>
-                            <p>
-                                Ontdek een nieuw verhaal voor je volgende leesmoment.
-                            </p>
+                            <p className="section-description" style={{ marginBottom: '20px' }}>Ontdek een nieuw verhaal voor je volgende leesmoment.</p>
                         </div>
-
-                        <Link className="button" to="/">
+                        <Link className="button button-outline" to="/" style={{ alignSelf: 'flex-start' }}>
                             Bekijk collectie →
                         </Link>
                     </article>

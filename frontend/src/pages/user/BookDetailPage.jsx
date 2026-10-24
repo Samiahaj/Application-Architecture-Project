@@ -54,6 +54,9 @@ export default function BookDetailPage() {
     useEffect(() => {
         let actief = true;
 
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         async function laadBoekEnReviews() {
             setLaden(true);
             setFout('');
@@ -68,10 +71,7 @@ export default function BookDetailPage() {
                 let reviewsData = [];
 
                 try {
-                    const gegevens = await apiFetch(
-                        `/api/reviews/book/${id}`
-                    );
-
+                    const gegevens = await apiFetch(`/api/reviews/book/${id}`);
                     reviewsData = Array.isArray(gegevens) ? gegevens : [];
                 } catch {
                     reviewsData = [];
@@ -84,10 +84,7 @@ export default function BookDetailPage() {
             } catch (error) {
                 if (actief) {
                     setBoek(null);
-                    setFout(
-                        error.message ||
-                        'De boekgegevens konden niet worden geladen.'
-                    );
+                    setFout(error.message || 'De boekgegevens konden niet worden geladen.');
                 }
             } finally {
                 if (actief) {
@@ -108,41 +105,23 @@ export default function BookDetailPage() {
         setReserveringSucces('');
 
         if (!gebruiker || gebruiker.rol !== 'USER') {
-            setReserveringFout(
-                'Je moet ingelogd zijn als gebruiker om een boek te reserveren.'
-            );
+            setReserveringFout('Je moet ingelogd zijn als gebruiker om een boek te reserveren.');
             return;
         }
 
         if (boek?.voorraad != null && Number(boek.voorraad) <= 0) {
-            setReserveringFout(
-                'Dit boek is momenteel niet beschikbaar.'
-            );
+            setReserveringFout('Dit boek is momenteel niet beschikbaar.');
             return;
         }
 
         setReserveren(true);
 
         try {
-            const parameters = new URLSearchParams({
-                bookId: String(id)
-            });
-
-            await apiFetch(
-                `/api/reservations?${parameters.toString()}`,
-                {
-                    method: 'POST'
-                }
-            );
-
-            setReserveringSucces(
-                'Je boek is succesvol gereserveerd!'
-            );
+            const parameters = new URLSearchParams({ bookId: String(id) });
+            await apiFetch(`/api/reservations?${parameters.toString()}`, { method: 'POST' });
+            setReserveringSucces('Je boek is succesvol gereserveerd!');
         } catch (error) {
-            setReserveringFout(
-                error.message ||
-                'Het boek kon niet worden gereserveerd. Probeer het opnieuw.'
-            );
+            setReserveringFout(error.message || 'Het boek kon niet worden gereserveerd. Probeer het opnieuw.');
         } finally {
             setReserveren(false);
         }
@@ -150,14 +129,11 @@ export default function BookDetailPage() {
 
     async function verstuurReview(event) {
         event.preventDefault();
-
         setReviewFout('');
         setReviewSucces('');
 
         if (!gebruiker || gebruiker.rol !== 'USER') {
-            setReviewFout(
-                'Je moet ingelogd zijn om een beoordeling te plaatsen.'
-            );
+            setReviewFout('Je moet ingelogd zijn om een beoordeling te plaatsen.');
             return;
         }
 
@@ -175,31 +151,15 @@ export default function BookDetailPage() {
                 tekst: tekst.trim()
             });
 
-            await apiFetch(
-                `/api/reviews?${parameters.toString()}`,
-                {
-                    method: 'POST'
-                }
-            );
+            await apiFetch(`/api/reviews?${parameters.toString()}`, { method: 'POST' });
 
-            setReviewSucces(
-                'Je beoordeling is succesvol geplaatst.'
-            );
-
+            setReviewSucces('Je beoordeling is succesvol geplaatst.');
             setTekst('');
 
-            const nieuweReviews = await apiFetch(
-                `/api/reviews/book/${id}`
-            );
-
-            setReviews(
-                Array.isArray(nieuweReviews) ? nieuweReviews : []
-            );
+            const nieuweReviews = await apiFetch(`/api/reviews/book/${id}`);
+            setReviews(Array.isArray(nieuweReviews) ? nieuweReviews : []);
         } catch (error) {
-            setReviewFout(
-                error.message ||
-                'Je beoordeling kon niet worden geplaatst. Controleer of je aan de voorwaarden voldoet.'
-            );
+            setReviewFout(error.message || 'Je beoordeling kon niet worden geplaatst. Controleer of je aan de voorwaarden voldoet.');
         } finally {
             setReviewLaden(false);
         }
@@ -208,10 +168,8 @@ export default function BookDetailPage() {
     if (laden) {
         return (
             <PageLayout>
-                <main className="dashboard-page">
-                    <p className="status-message">
-                        De boekgegevens worden geladen...
-                    </p>
+                <main className="dashboard-page fade-in">
+                    <p className="status-message">De boekgegevens worden geladen...</p>
                 </main>
             </PageLayout>
         );
@@ -220,203 +178,168 @@ export default function BookDetailPage() {
     if (fout || !boek) {
         return (
             <PageLayout>
-                <main className="dashboard-page">
-                    <div className="alert alert-error">
-                        {fout || 'Dit boek werd niet gevonden.'}
-                    </div>
-
-                    <Link className="button" to="/">
-                        Terug naar de collectie
-                    </Link>
+                <main className="dashboard-page fade-in">
+                    <div className="alert alert-error">{fout || 'Dit boek werd niet gevonden.'}</div>
+                    <Link className="button" to="/">Terug naar de collectie</Link>
                 </main>
             </PageLayout>
         );
     }
 
     const gemiddeldeScore = reviews.length > 0
-        ? reviews.reduce(
-        (totaal, review) =>
-            totaal + (Number(review.score) || 0),
-        0
-    ) / reviews.length
+        ? reviews.reduce((totaal, review) => totaal + (Number(review.score) || 0), 0) / reviews.length
         : null;
 
-    const voorraadBekend = boek.voorraad !== null
-        && boek.voorraad !== undefined;
-
-    const geenVoorraad = voorraadBekend
-        && Number(boek.voorraad) <= 0;
+    const voorraadBekend = boek.voorraad !== null && boek.voorraad !== undefined;
+    const geenVoorraad = voorraadBekend && Number(boek.voorraad) <= 0;
+    const coverIndex = (boek.id ? boek.id % 5 : 0) + 1;
 
     return (
         <PageLayout>
-            <main className="dashboard-page book-detail-page">
-                <Link className="text-link" to="/">
-                    ← Terug naar de collectie
-                </Link>
+            <main className="dashboard-page book-detail-page fade-in">
+                <div style={{ marginBottom: '35px' }}>
+                    <Link className="text-link" to="/">
+                        ← Terug naar de collectie
+                    </Link>
+                </div>
 
-                <section className="book-detail">
-                    <div className="book-detail-cover">
+                <section className="book-detail" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '50px', alignItems: 'start' }}>
+                    <div className="book-detail-cover slide-in" style={{ animationDelay: '0.1s' }}>
+                        <div className="book-cover-container" style={{ height: '280px', overflow: 'hidden', borderRadius: 'var(--radius-small)', position: 'relative' }}>
+                            {boek.imageUrl && boek.imageUrl.startsWith('http') ? (
+                                <img
+                                    src={boek.imageUrl}
+                                    alt={boek.titel}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    onError={(e) => {
+                                        // Si l'image ne charge pas (erreur 404 par exemple), on cache l'image cassée
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            ) : (
+                                <div className={`book-cover cover-theme-${coverIndex}`} style={{ height: '100%', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', opacity: 0.8 }}>
+                BOEKHAVEN · COLLECTIE
+            </span>
 
+                                    <div>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', display: 'block', marginBottom: '8px', lineHeight: 1.2 }}>
+                    {boek.titel}
+                </span>
 
+                                        <span style={{ fontSize: '12px', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    {auteursTekst(boek)}
+                </span>
+                                    </div>
 
+                                    <span aria-hidden="true" style={{ alignSelf: 'flex-end', fontSize: '20px', opacity: 0.4 }}>
+                ✳
+            </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="book-detail-info">
-                        <p className="eyebrow">
-                            ONTDEK DIT VERHAAL
-                        </p>
+                    <div className="book-detail-info slide-in" style={{ animationDelay: '0.2s', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div>
+                            <p className="eyebrow" style={{ marginBottom: '10px' }}>{auteursTekst(boek)}</p>
+                            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '38px', color: 'var(--brown-dark)', margin: '0 0 15px 0' }}>
+                                {boek.titel}
+                            </h1>
+                            {boek.isbn && (
+                                <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '15px' }}>
+                                    ISBN: {boek.isbn}
+                                </p>
+                            )}
+                        </div>
 
-                        <h1>{boek.titel}</h1>
+                        <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--brown)' }}>
+                            {prijsFormatter(boek.prijs)}
+                        </div>
 
-                        <p className="book-author">
-                            Door {auteursTekst(boek)}
-                        </p>
-
-                        <p className="book-description">
-                            {boek.omschrijving
-                                || 'Er is nog geen beschrijving beschikbaar.'}
-                        </p>
-
-                        <div className="book-detail-facts">
-                            <p>
-                                <strong>ISBN:</strong>{' '}
-                                {boek.isbn || 'Niet beschikbaar'}
-                            </p>
-
-                            <p>
-                                <strong>Prijs:</strong>{' '}
-                                {prijsFormatter(boek.prijs)}
-                            </p>
-
-                            <p>
-                                <strong>Beschikbare voorraad:</strong>{' '}
-                                {voorraadBekend
-                                    ? boek.voorraad
-                                    : 'Niet beschikbaar'}
+                        <div>
+                            <h3 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--brown-light)', marginBottom: '8px' }}>
+                                Over dit boek
+                            </h3>
+                            <p style={{ lineHeight: '1.8', color: '#6e6257', margin: 0 }}>
+                                {boek.omschrijving || 'Geen omschrijving beschikbaar voor dit boek.'}
                             </p>
                         </div>
 
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
+                            <span className={`stock-badge ${!geenVoorraad ? 'in-stock' : 'out-of-stock'}`} style={{ fontSize: '12px' }}>
+                                {!geenVoorraad ? `Op voorraad (${boek.voorraad} beschikbaar)` : 'Momenteel niet op voorraad'}
+                            </span>
+                        </div>
+
                         {gebruiker?.rol === 'USER' && (
-                            <div className="reservation-actions">
+                            <div style={{ marginTop: '20px' }}>
                                 <button
                                     className="button"
                                     type="button"
                                     onClick={reserveerBoek}
                                     disabled={reserveren || geenVoorraad}
+                                    style={{ opacity: geenVoorraad ? 0.6 : 1, cursor: geenVoorraad ? 'not-allowed' : 'pointer' }}
                                 >
-                                    {reserveren
-                                        ? 'Reservering verwerken...'
-                                        : geenVoorraad
-                                            ? 'Niet beschikbaar'
-                                            : 'Reserveer dit boek'}
+                                    {reserveren ? 'Bezig met reserveren...' : 'Boek reserveren'}
                                 </button>
 
-                                {reserveringFout && (
-                                    <div
-                                        className="alert alert-error"
-                                        role="alert"
-                                    >
-                                        {reserveringFout}
-                                    </div>
-                                )}
-
-                                {reserveringSucces && (
-                                    <div
-                                        className="reservation-success"
-                                        role="status"
-                                    >
-                                        <p>{reserveringSucces}</p>
-
-                                        <Link
-                                            className="button"
-                                            to="/mijn-reserveringen"
-                                        >
-                                            Bekijk mijn reserveringen
-                                        </Link>
-                                    </div>
-                                )}
+                                {reserveringFout && <div className="alert alert-error" style={{ marginTop: '15px' }}>{reserveringFout}</div>}
+                                {reserveringSucces && <div className="alert alert-success" style={{ marginTop: '15px' }}>{reserveringSucces}</div>}
                             </div>
-                        )}
-
-                        {!gebruiker && (
-                            <Link
-                                className="button"
-                                to="/login"
-                                state={{
-                                    from: {
-                                        pathname: `/boeken/${boek.id}`
-                                    }
-                                }}
-                            >
-                                Log in om te reserveren
-                            </Link>
                         )}
                     </div>
                 </section>
 
-                <section className="reviews-section">
-                    <div className="section-heading">
+                <section className="reviews-section fade-in" style={{ animationDelay: '0.3s', marginTop: '60px', paddingTop: '60px', borderTop: '1px solid var(--line)' }}>
+                    <div className="section-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
-                            <p className="eyebrow">
-                                ERVARINGEN VAN LEZERS
-                            </p>
-
+                            <p className="eyebrow">ERVARINGEN VAN LEZERS</p>
                             <h2>Beoordelingen</h2>
                         </div>
 
                         {gemiddeldeScore !== null && (
-                            <p>
-                                ★ {gemiddeldeScore.toFixed(1)} / 5
-                                {' '}({reviews.length} beoordelingen)
-                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--champagne)', color: 'var(--white)', padding: '10px 20px', borderRadius: '30px' }}>
+                                <span style={{ fontSize: '20px' }}>★</span>
+                                <strong style={{ fontSize: '18px' }}>{gemiddeldeScore.toFixed(1)}</strong>
+                                <span style={{ fontSize: '14px', opacity: 0.9 }}>/ 5 ({reviews.length})</span>
+                            </div>
                         )}
                     </div>
 
                     {reviews.length === 0 && (
-                        <div className="empty-state">
+                        <div className="empty-state" style={{ marginTop: '25px' }}>
                             <h3>Nog geen beoordelingen</h3>
-
-                            <p>
-                                Er zijn nog geen beoordelingen voor dit boek.
-                            </p>
+                            <p>Er zijn nog geen beoordelingen voor dit boek. Wees de eerste om je mening te delen!</p>
                         </div>
                     )}
 
-                    <div className="reviews-list">
+                    <div className="reviews-list" style={{ display: 'grid', gap: '20px', marginTop: '30px' }}>
                         {reviews.map((review) => {
-                            const aantalSterren = Math.max(
-                                0,
-                                Math.min(
-                                    5,
-                                    Number(review.score) || 0
-                                )
-                            );
+                            const aantalSterren = Math.max(0, Math.min(5, Number(review.score) || 0));
 
                             return (
-                                <article
-                                    className="review-card"
-                                    key={review.id}
-                                >
-                                    <div className="review-card-header">
-                                        <h3>
-                                            {review.gebruiker?.naam
-                                                || 'Lezer'}
+                                <article className="review-card" key={review.id} style={{ background: 'var(--white)', padding: '25px', borderRadius: 'var(--radius-small)', border: '1px solid var(--line)', boxShadow: 'var(--shadow-soft)' }}>
+                                    <div className="review-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--brown-dark)' }}>
+                                            {review.gebruiker?.naam || 'Lezer'}
                                         </h3>
-
-                                        <span
-                                            aria-label={`${aantalSterren} op 5 sterren`}
-                                        >
+                                        <span aria-label={`${aantalSterren} op 5 sterren`} style={{ color: '#dcb344', letterSpacing: '2px' }}>
                                             {'★'.repeat(aantalSterren)}
-                                            {'☆'.repeat(5 - aantalSterren)}
+                                            <span style={{ color: '#dfd5c5' }}>{'☆'.repeat(5 - aantalSterren)}</span>
                                         </span>
                                     </div>
 
-                                    <p>{review.tekst}</p>
+                                    <p style={{ margin: 0, fontStyle: 'italic', lineHeight: '1.6', color: 'var(--brown)' }}>
+                                        "{review.tekst}"
+                                    </p>
 
                                     {review.antwoord && (
-                                        <div className="review-answer">
-                                            <strong>Reactie van BoekHaven</strong>
-                                            <p>{review.antwoord}</p>
+                                        <div className="review-answer" style={{ marginTop: '20px', padding: '15px', background: '#fdfcfa', borderLeft: '3px solid var(--champagne)', borderRadius: '0 var(--radius-small) var(--radius-small) 0' }}>
+                                            <strong style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: 'var(--brown-light)', marginBottom: '5px' }}>
+                                                Reactie van BoekHaven
+                                            </strong>
+                                            <p style={{ margin: 0, fontSize: '14px' }}>{review.antwoord}</p>
                                         </div>
                                     )}
                                 </article>
@@ -426,96 +349,41 @@ export default function BookDetailPage() {
                 </section>
 
                 {gebruiker?.rol === 'USER' && (
-                    <section className="review-form-section">
-                        <p className="eyebrow">
-                            DEEL JE ERVARING
-                        </p>
+                    <section className="review-form-section slide-in" style={{ animationDelay: '0.4s', marginTop: '40px', background: 'var(--cream)', padding: '40px', borderRadius: 'var(--radius-medium)' }}>
+                        <p className="eyebrow">DEEL JE ERVARING</p>
+                        <h2 style={{ marginBottom: '25px' }}>Schrijf een beoordeling</h2>
 
-                        <h2>Schrijf een beoordeling</h2>
+                        <form onSubmit={verstuurReview} className="form-stack">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label htmlFor="score">Jouw beoordeling</label>
+                                <select id="score" value={score} onChange={(event) => setScore(Number(event.target.value))} style={{ padding: '12px', border: '1px solid var(--line)', borderRadius: 'var(--radius-small)', background: 'var(--white)' }}>
+                                    <option value={5}>5 sterren - Uitstekend</option>
+                                    <option value={4}>4 sterren - Zeer goed</option>
+                                    <option value={3}>3 sterren - Goed</option>
+                                    <option value={2}>2 sterren - Matig</option>
+                                    <option value={1}>1 ster - Slecht</option>
+                                </select>
+                            </div>
 
-                        <p>
-                            Je kunt een beoordeling plaatsen als je aan
-                            de voorwaarden voor dit boek voldoet.
-                        </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
+                                <label htmlFor="tekst">Jouw mening</label>
+                                <textarea
+                                    id="tekst"
+                                    value={tekst}
+                                    onChange={(event) => setTekst(event.target.value)}
+                                    placeholder="Wat vond je van dit boek? Deel je gedachten..."
+                                    rows={5}
+                                    maxLength={2000}
+                                    style={{ padding: '15px', border: '1px solid var(--line)', borderRadius: 'var(--radius-small)', background: 'var(--white)', resize: 'vertical' }}
+                                    required
+                                />
+                            </div>
 
-                        <form
-                            onSubmit={verstuurReview}
-                            className="review-form"
-                        >
-                            <label htmlFor="score">
-                                Jouw beoordeling
-                            </label>
+                            {reviewFout && <div className="alert alert-error" role="alert" style={{ marginTop: '15px' }}>{reviewFout}</div>}
+                            {reviewSucces && <div className="alert alert-success" role="status" style={{ marginTop: '15px' }}>{reviewSucces}</div>}
 
-                            <select
-                                id="score"
-                                value={score}
-                                onChange={(event) =>
-                                    setScore(Number(event.target.value))
-                                }
-                            >
-                                <option value={5}>
-                                    5 sterren - Uitstekend
-                                </option>
-
-                                <option value={4}>
-                                    4 sterren - Zeer goed
-                                </option>
-
-                                <option value={3}>
-                                    3 sterren - Goed
-                                </option>
-
-                                <option value={2}>
-                                    2 sterren - Matig
-                                </option>
-
-                                <option value={1}>
-                                    1 ster - Slecht
-                                </option>
-                            </select>
-
-                            <label htmlFor="tekst">
-                                Jouw mening
-                            </label>
-
-                            <textarea
-                                id="tekst"
-                                value={tekst}
-                                onChange={(event) =>
-                                    setTekst(event.target.value)
-                                }
-                                placeholder="Wat vond je van dit boek?"
-                                rows={5}
-                                maxLength={2000}
-                                required
-                            />
-
-                            {reviewFout && (
-                                <div
-                                    className="alert alert-error"
-                                    role="alert"
-                                >
-                                    {reviewFout}
-                                </div>
-                            )}
-
-                            {reviewSucces && (
-                                <p
-                                    className="status-message"
-                                    role="status"
-                                >
-                                    {reviewSucces}
-                                </p>
-                            )}
-
-                            <button
-                                className="button"
-                                type="submit"
-                                disabled={reviewLaden}
-                            >
-                                {reviewLaden
-                                    ? 'Beoordeling versturen...'
-                                    : 'Beoordeling plaatsen'}
+                            <button className="button" type="submit" disabled={reviewLaden} style={{ marginTop: '20px' }}>
+                                {reviewLaden ? 'Beoordeling versturen...' : 'Beoordeling plaatsen'}
                             </button>
                         </form>
                     </section>

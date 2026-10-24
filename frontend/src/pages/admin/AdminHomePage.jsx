@@ -7,64 +7,60 @@ export default function AdminHomePage() {
             titel: 'Boeken',
             beschrijving: 'Voeg boeken toe, wijzig gegevens en beheer auteurs.',
             link: '/admin/boeken',
-            symbool: '📚',
         },
         {
             titel: 'Gebruikers',
             beschrijving: 'Bekijk gebruikers, wijzig rollen en beheer accounts.',
             link: '/admin/gebruikers',
-            symbool: '👥',
         },
         {
             titel: 'Reserveringen',
             beschrijving: 'Bekijk reserveringen en beheer hun status.',
             link: '/admin/reserveringen',
-            symbool: '📋',
         },
         {
             titel: 'Commentaarbeheer',
             beschrijving: 'Bekijk beoordelingen en beantwoord vragen van klanten.',
             link: '/admin/commentaren',
-            symbool: '💬',
         },
     ];
 
     return (
         <PageLayout>
-            <main className="admin-dashboard">
-                <header className="admin-dashboard-header">
-                    <p className="eyebrow">BOEKHAVEN · BEHEER</p>
-
-                    <h1>Admin dashboard</h1>
-
-                    <p>
-                        Welkom in het beheerdersgedeelte.
-                        Wat wil je vandaag beheren?
-                    </p>
+            <main className="dashboard-page">
+                <header className="dashboard-heading">
+                    <div>
+                        <p className="eyebrow">BOEKHAVEN · BEHEER</p>
+                        <h1>Admin dashboard</h1>
+                        <p className="section-description">
+                            Welkom in het beheerdersgedeelte. Wat wil je vandaag beheren?
+                        </p>
+                    </div>
                 </header>
 
                 <section
-                    className="admin-dashboard-grid"
+                    className="dashboard-grid"
                     aria-label="Beheerdersopties"
                 >
                     {onderdelen.map((onderdeel) => (
                         <Link
                             key={onderdeel.link}
                             to={onderdeel.link}
-                            className="admin-dashboard-card"
+                            className="panel"
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                textDecoration: 'none',
+                                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(182, 154, 112, 0.05) 10px, rgba(182, 154, 112, 0.05) 20px)'
+                            }}
                         >
-                            <span
-                                className="admin-dashboard-icon"
-                                aria-hidden="true"
-                            >
-                                {onderdeel.symbool}
-                            </span>
-
                             <h2>{onderdeel.titel}</h2>
 
-                            <p>{onderdeel.beschrijving}</p>
+                            <p className="section-description" style={{ marginBottom: '25px' }}>
+                                {onderdeel.beschrijving}
+                            </p>
 
-                            <span className="admin-dashboard-link">
+                            <span className="text-link" style={{ marginTop: 'auto' }}>
                                 Beheren →
                             </span>
                         </Link>

@@ -1,25 +1,18 @@
-// De Controller ontvangt HTTP-aanvragen, roept de juiste methode van de Service aan en stuurt een antwoord terug naar de gebruiker.
 package be.ehb.backend.controller;
 
 import be.ehb.backend.model.Book;
 import be.ehb.backend.service.BookService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.ResponseEntity;
 import java.util.Optional;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
+import java.math.BigDecimal;
 
 import java.util.List;
-// Vertelt aan Spring dat deze klasse HTTP-aanvragen behandelt en resultaten terugstuurt
+
 @RestController
-//Bepaalt het basispad van deze Controller.
 @RequestMapping("/api/books")
 public class BookController {
 
@@ -31,10 +24,9 @@ public class BookController {
 
     @GetMapping
     public List<Book> getAllBooks() {
-        //De Controller vraagt de Service om alle boeken op te halen. De Service gebruikt daarvoor de Repository.
         return bookService.getAllBooks();
     }
-    // Een boek ophalen op basis van het ID
+
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable Long id) {
         Optional<Book> book = bookService.getBookById(id);
@@ -45,32 +37,65 @@ public class BookController {
 
         return ResponseEntity.notFound().build();
     }
+
     @PostMapping
-    public ResponseEntity<?> addBook(@Valid @RequestBody Book book) {
+    public ResponseEntity<?> addBook(
+            @RequestParam("titel") String titel,
+            @RequestParam("isbn") String isbn,
+            @RequestParam("omschrijving") String omschrijving,
+            @RequestParam("prijs") BigDecimal prijs,
+            @RequestParam("voorraad") Integer voorraad,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+            @RequestParam(value = "auteurIds", required = false) List<Long> auteurIds) {
         try {
-            Book newBook = bookService.addBook(book);
+            Book book = new Book();
+            book.setTitel(titel);
+            book.setIsbn(isbn);
+            book.setOmschrijving(omschrijving);
+            book.setPrijs(prijs);
+            book.setVoorraad(voorraad);
+
+            Book newBook = bookService.addBookWithFile(book, imageFile, auteurIds);
             return ResponseEntity.status(HttpStatus.CREATED).body(newBook);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     java.util.Map.of("message", e.getMessage())
             );
         }
     }
-    // Een bestaand boek aanpassen
+
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(
+    public ResponseEntity<?> updateBook(
             @PathVariable Long id,
-            @Valid @RequestBody Book book) {
+            @RequestParam("titel") String titel,
+            @RequestParam("isbn") String isbn,
+            @RequestParam("omschrijving") String omschrijving,
+            @RequestParam("prijs") BigDecimal prijs,
+            @RequestParam("voorraad") Integer voorraad,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+            @RequestParam(value = "auteurIds", required = false) List<Long> auteurIds) {
+        try {
+            Book bookDetails = new Book();
+            bookDetails.setTitel(titel);
+            bookDetails.setIsbn(isbn);
+            bookDetails.setOmschrijving(omschrijving);
+            bookDetails.setPrijs(prijs);
+            bookDetails.setVoorraad(voorraad);
 
-        Book updatedBook = bookService.updateBook(id, book);
+            Book updatedBook = bookService.updateBookWithFile(id, bookDetails, imageFile, auteurIds);
 
-        if (updatedBook == null) {
-            return ResponseEntity.notFound().build();
+            if (updatedBook == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(updatedBook);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    java.util.Map.of("message", e.getMessage())
+            );
         }
-
-        return ResponseEntity.ok(updatedBook);
     }
-    // Een boek verwijderen
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         boolean deleted = bookService.deleteBook(id);
@@ -82,7 +107,6 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
-    // Voegt een auteur toe aan een boek
     @PostMapping("/{bookId}/authors/{authorId}")
     public ResponseEntity<Book> addAuthorToBook(
             @PathVariable Long bookId,

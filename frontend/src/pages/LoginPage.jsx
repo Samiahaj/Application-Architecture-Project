@@ -17,7 +17,7 @@ export default function LoginPage() {
     if (authLaden) {
         return (
             <PageLayout>
-                <main className="auth-page">
+                <main className="auth-page fade-in">
                     <p className="status-message">
                         Je gegevens worden geladen…
                     </p>
@@ -64,8 +64,7 @@ export default function LoginPage() {
                     ? '/admin'
                     : '/home';
 
-            // Bewaar eventueel de oorspronkelijke bestemming,
-            // bijvoorbeeld wanneer de gebruiker eerst een boek wilde bekijken.
+            // Bewaar eventueel de oorspronkelijke bestemming
             const vorigeBestemming = location.state?.from;
 
             const bestemming =
@@ -88,24 +87,26 @@ export default function LoginPage() {
 
     return (
         <PageLayout>
-            <main className="auth-page">
-                <section className="auth-card">
-                    <p className="eyebrow">FIJN DAT JE ER BENT</p>
+            <main className="auth-page fade-in">
+                <section className="auth-card slide-in">
+                    <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                        <p className="eyebrow">FIJN DAT JE ER BENT</p>
 
-                    <h1>Welkom terug.</h1>
+                        <h1 style={{ marginBottom: '10px' }}>Welkom terug.</h1>
 
-                    <p className="auth-intro">
-                        Log in om je account en reservaties te bekijken.
-                    </p>
+                        <p className="auth-intro" style={{ margin: 0 }}>
+                            Log in om je account en reservaties te bekijken.
+                        </p>
+                    </div>
 
                     {location.state?.bericht && (
-                        <div className="alert alert-success">
+                        <div className="alert alert-success slide-in">
                             {location.state.bericht}
                         </div>
                     )}
 
                     {fout && (
-                        <div className="alert alert-error" role="alert">
+                        <div className="alert alert-error slide-in" role="alert">
                             {fout}
                         </div>
                     )}
@@ -113,7 +114,6 @@ export default function LoginPage() {
                     <form onSubmit={verzend} className="form-stack">
                         <label>
                             E-mailadres
-
                             <input
                                 type="email"
                                 autoComplete="email"
@@ -121,13 +121,13 @@ export default function LoginPage() {
                                 onChange={(event) =>
                                     setEmail(event.target.value)
                                 }
+                                placeholder="naam@voorbeeld.be"
                                 required
                             />
                         </label>
 
                         <label>
                             Wachtwoord
-
                             <input
                                 type="password"
                                 autoComplete="current-password"
@@ -135,6 +135,7 @@ export default function LoginPage() {
                                 onChange={(event) =>
                                     setWachtwoord(event.target.value)
                                 }
+                                placeholder="••••••••"
                                 required
                             />
                         </label>
@@ -143,6 +144,7 @@ export default function LoginPage() {
                             className="button button-full"
                             type="submit"
                             disabled={laden}
+                            style={{ marginTop: '12px' }}
                         >
                             {laden
                                 ? 'Bezig met inloggen…'

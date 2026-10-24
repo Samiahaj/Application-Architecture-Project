@@ -13,6 +13,20 @@ function auteursTekst(boek) {
         .join(', ');
 }
 
+function prijsFormatter(prijs) {
+    if (prijs === null || prijs === undefined || prijs === '') {
+        return 'Niet beschikbaar';
+    }
+    const bedrag = Number(prijs);
+    if (!Number.isFinite(bedrag)) {
+        return 'Niet beschikbaar';
+    }
+    return bedrag.toLocaleString('nl-BE', {
+        style: 'currency',
+        currency: 'EUR'
+    });
+}
+
 export default function HomePage() {
     const [boeken, setBoeken] = useState([]);
     const [zoekterm, setZoekterm] = useState('');
@@ -65,8 +79,8 @@ export default function HomePage() {
         <PageLayout>
             <main>
                 {/* Welkomstgedeelte */}
-                <section className="hero-section">
-                    <div className="hero-copy">
+                <section className="hero-section fade-in">
+                    <div className="hero-copy slide-in">
                         <p className="eyebrow">
                             JOUW VOLGENDE FAVORIETE VERHAAL
                         </p>
@@ -89,7 +103,7 @@ export default function HomePage() {
                         </a>
                     </div>
 
-                    <div className="hero-art" aria-hidden="true">
+                    <div className="hero-art fade-in" aria-hidden="true" style={{ animationDelay: '0.3s' }}>
                         <div className="art-circle" />
 
                         <div className="book book-one">
@@ -120,7 +134,7 @@ export default function HomePage() {
                 </section>
 
                 {/* Boekencollectie */}
-                <section className="collection-section" id="collectie">
+                <section className="collection-section fade-in" id="collectie" style={{ animationDelay: '0.2s' }}>
                     <div className="section-heading">
                         <div>
                             <p className="eyebrow">MET ZORG GEKOZEN</p>
@@ -149,14 +163,14 @@ export default function HomePage() {
 
                     {/* Laden */}
                     {laden && (
-                        <p className="status-message">
+                        <p className="status-message fade-in">
                             De collectie wordt geladen…
                         </p>
                     )}
 
                     {/* Foutmelding */}
                     {!laden && fout && (
-                        <div className="alert alert-error">
+                        <div className="alert alert-error slide-in">
                             <p>{fout}</p>
 
                             <button
@@ -170,7 +184,7 @@ export default function HomePage() {
 
                     {/* Geen boeken gevonden */}
                     {!laden && !fout && gefilterdeBoeken.length === 0 && (
-                        <div className="empty-state">
+                        <div className="empty-state slide-in">
                             <h3>Geen boeken gevonden</h3>
                             <p>
                                 Probeer een andere zoekterm of controleer
@@ -179,91 +193,87 @@ export default function HomePage() {
                         </div>
                     )}
 
-                    {/* Boeken */}
+                    {/* Boeken grid */}
                     {!laden && !fout && gefilterdeBoeken.length > 0 && (
                         <div className="book-grid">
-                            {gefilterdeBoeken.map((boek, index) => (
-                                <article
-                                    className="book-card"
-                                    key={boek.id}
-                                >
-                                    <Link
-                                        className="book-cover-link"
-                                        to={`/boeken/${boek.id}`}
-                                        aria-label={`Bekijk ${boek.titel}`}
+                            {gefilterdeBoeken.map((boek, index) => {
+                                const coverIndex = (boek.id ? boek.id % 5 : index % 5) + 1;
+
+                                return (
+                                    <article
+                                        className="book-card slide-in"
+                                        key={boek.id}
+                                        style={{ animationDelay: `${0.1 * (index % 12)}s`, animationFillMode: 'both' }}
                                     >
-                                        <div
-                                            className={`book-cover cover-${index % 6}`}
+                                        <Link
+                                            className="book-cover-link"
+                                            to={`/boeken/${boek.id}`}
+                                            aria-label={`Bekijk ${boek.titel}`}
+                                            style={{ display: 'block' }}
                                         >
-                                            <span className="cover-label">
-                                                BOEKHAVEN · COLLECTIE
-                                            </span>
+                                            <div className="book-cover-container" style={{ height: '280px', overflow: 'hidden', borderRadius: 'var(--radius-small)', position: 'relative' }}>
+                                                {boek.imageUrl && boek.imageUrl.startsWith('http') ? (
+                                                    <img
+                                                        src={boek.imageUrl}
+                                                        alt={boek.titel}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                        onError={(e) => {
+                                                            // Si l'image ne charge pas (erreur 404 par exemple), on cache l'image cassée
+                                                            e.target.style.display = 'none';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className={`book-cover cover-theme-${coverIndex}`} style={{ height: '100%', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', opacity: 0.8 }}>
+                BOEKHAVEN · COLLECTIE
+            </span>
 
-                                            <span className="cover-title">
-                                                {boek.titel}
-                                            </span>
+                                                        <div>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', display: 'block', marginBottom: '8px', lineHeight: 1.2 }}>
+                    {boek.titel}
+                </span>
 
-                                            <span className="cover-author">
-                                                {auteursTekst(boek)}
-                                            </span>
+                                                            <span style={{ fontSize: '12px', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    {auteursTekst(boek)}
+                </span>
+                                                        </div>
 
-                                            <span
-                                                className="cover-decoration"
-                                                aria-hidden="true"
-                                            >
-                                                ✳
-                                            </span>
-                                        </div>
-                                    </Link>
+                                                        <span aria-hidden="true" style={{ alignSelf: 'flex-end', fontSize: '20px', opacity: 0.4 }}>
+                ✳
+            </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </Link>
 
-                                    <div className="book-info">
-                                        <p className="book-author">
-                                            {auteursTekst(boek)}
-                                        </p>
+                                        <div className="book-card-info">
+                                            <span className="book-card-author">{auteursTekst(boek)}</span>
 
-                                        <h3>
-                                            <Link
-                                                className="book-title-link"
-                                                to={`/boeken/${boek.id}`}
-                                            >
-                                                {boek.titel}
+                                            <Link to={`/boeken/${boek.id}`}>
+                                                <h3 className="book-card-title">{boek.titel}</h3>
                                             </Link>
-                                        </h3>
 
-                                        <p className="book-description">
-                                            {boek.omschrijving ||
-                                                'Ontdek dit boek en laat je meenemen door het verhaal.'}
-                                        </p>
+                                            <p className="book-description">
+                                                {boek.omschrijving || 'Geen beschrijving beschikbaar.'}
+                                            </p>
 
-                                        <div className="book-card-bottom">
-                                            <strong>
-                                                {Number(
-                                                    boek.prijs || 0
-                                                ).toLocaleString('nl-BE', {
-                                                    style: 'currency',
-                                                    currency: 'EUR',
-                                                })}
-                                            </strong>
+                                            <div className="book-card-bottom">
+                                                <span className="book-price">{prijsFormatter(boek.prijs)}</span>
 
-                                            <Link
-                                                className="text-link"
-                                                to={`/boeken/${boek.id}`}
-                                            >
-                                                Bekijk boek{' '}
-                                                <span aria-hidden="true">
-                                                    →
+                                                <span className={`stock-badge ${boek.voorraad > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                                                    {boek.voorraad > 0 ? `Op voorraad (${boek.voorraad})` : 'Niet op voorraad'}
                                                 </span>
-                                            </Link>
+                                            </div>
                                         </div>
-                                    </div>
-                                </article>
-                            ))}
+                                    </article>
+                                );
+                            })}
                         </div>
                     )}
                 </section>
 
                 {/* Inspiratie */}
-                <section className="quote-section">
+                <section className="quote-section slide-in" style={{ animationDelay: '0.4s' }}>
                     <p className="eyebrow">
                         EEN KLEIN MOMENT VOOR JEZELF
                     </p>
@@ -272,7 +282,7 @@ export default function HomePage() {
                         “Een boek is een deur naar een wereld die op je wacht.”
                     </blockquote>
 
-                    <p>
+                    <p style={{ color: 'var(--burgundy)', fontWeight: 'bold', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase' }}>
                         Maak het jezelf gemakkelijk. Het volgende verhaal
                         begint hier.
                     </p>

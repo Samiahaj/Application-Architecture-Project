@@ -17,23 +17,16 @@ export default function CommentManagementPage() {
 
         try {
             const data = await apiFetch('/api/reviews');
-
             const lijst = Array.isArray(data) ? data : [];
             setCommentaren(lijst);
 
             const bestaandeAntwoorden = {};
-
             lijst.forEach((commentaar) => {
-                bestaandeAntwoorden[commentaar.id] =
-                    commentaar.antwoord || '';
+                bestaandeAntwoorden[commentaar.id] = commentaar.antwoord || '';
             });
-
             setAntwoorden(bestaandeAntwoorden);
         } catch (error) {
-            setFout(
-                error.message ||
-                'De beoordelingen konden niet worden geladen.'
-            );
+            setFout(error.message || 'De beoordelingen konden niet worden geladen.');
         } finally {
             setLaden(false);
         }
@@ -66,18 +59,13 @@ export default function CommentManagementPage() {
 
             setCommentaren((huidigeCommentaren) =>
                 huidigeCommentaren.map((item) =>
-                    item.id === commentaar.id
-                        ? { ...item, ...bijgewerktCommentaar }
-                        : item
+                    item.id === commentaar.id ? { ...item, ...bijgewerktCommentaar } : item
                 )
             );
 
             setBericht('Het antwoord is opgeslagen.');
         } catch (error) {
-            setFout(
-                error.message ||
-                'Het antwoord kon niet worden opgeslagen.'
-            );
+            setFout(error.message || 'Het antwoord kon niet worden opgeslagen.');
         } finally {
             setBezigMetId(null);
         }
@@ -86,7 +74,7 @@ export default function CommentManagementPage() {
     return (
         <PageLayout>
             <main className="dashboard-page">
-                <section className="section-heading">
+                <section className="dashboard-heading">
                     <div>
                         <p className="eyebrow">BOEKHAVEN · BEHEER</p>
                         <h1>Commentaarbeheer</h1>
@@ -94,141 +82,115 @@ export default function CommentManagementPage() {
                             Bekijk beoordelingen en beantwoord reacties van klanten.
                         </p>
                     </div>
+
+                    <button
+                        className="button button-outline"
+                        type="button"
+                        onClick={laadCommentaren}
+                        disabled={laden || bezigMetId !== null}
+                    >
+                        ↻ Vernieuwen
+                    </button>
                 </section>
 
-                <div className="profile-actions">
+                <div style={{ marginBottom: '35px' }}>
                     <Link className="text-link" to="/admin">
                         ← Terug naar het dashboard
                     </Link>
                 </div>
 
                 {bericht && (
-                    <p className="status-message" role="status">
+                    <div className="alert alert-success slide-in" role="status">
                         {bericht}
-                    </p>
+                    </div>
                 )}
 
                 {fout && (
-                    <div className="alert alert-error" role="alert">
+                    <div className="alert alert-error slide-in" role="alert">
                         {fout}
                     </div>
                 )}
 
-                <section className="profile-action-card">
-                    <div>
-                        <p className="eyebrow">BEOORDELINGEN</p>
-                        <h2>Alle beoordelingen ({commentaren.length})</h2>
-                        <p>
-                            Lees de beoordelingen en geef indien nodig een antwoord.
-                        </p>
-                    </div>
-
-                    <button
-                        className="button"
-                        type="button"
-                        onClick={laadCommentaren}
-                        disabled={laden || bezigMetId !== null}
-                    >
-                        Vernieuwen
-                    </button>
-                </section>
-
                 {laden ? (
-                    <p className="status-message" role="status">
+                    <p className="status-message fade-in" role="status">
                         De beoordelingen worden geladen...
                     </p>
                 ) : commentaren.length === 0 ? (
-                    <div className="empty-state">
+                    <div className="empty-state fade-in">
                         <h3>Geen beoordelingen gevonden</h3>
                         <p>Er zijn momenteel geen beoordelingen beschikbaar.</p>
                     </div>
                 ) : (
-                    <section className="user-management-section">
-                        {commentaren.map((commentaar) => (
-                            <article
-                                className="profile-action-card"
-                                key={commentaar.id}
-                            >
-                                <div>
-                                    <p className="eyebrow">
-                                        BEOORDELING #{commentaar.id}
-                                    </p>
+                    <section className="review-admin-grid fade-in">
+                        {commentaren.map((commentaar) => {
+                            const score = Math.max(0, Math.min(5, Number(commentaar.score) || 0));
 
-                                    <h2>
-                                        {commentaar.boek?.titel ||
-                                            'Onbekend boek'}
-                                    </h2>
+                            return (
+                                <article className="review-admin-card" key={commentaar.id}>
+                                    <div className="review-admin-header">
+                                        <div className="review-admin-user">
+                                            <div className="user-avatar">
+                                                {(commentaar.gebruiker?.naam || '?').charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <h3>{commentaar.gebruiker?.naam || 'Onbekende klant'}</h3>
+                                                <span className="user-email">{commentaar.gebruiker?.email || 'Geen e-mail'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="review-admin-stars">
+                                            <span className="stars-filled">{'★'.repeat(score)}</span>
+                                            <span className="stars-empty">{'☆'.repeat(5 - score)}</span>
+                                        </div>
+                                    </div>
 
-                                    <p>
-                                        <strong>Klant:</strong>{' '}
-                                        {commentaar.gebruiker?.naam ||
-                                            'Onbekende klant'}
-                                    </p>
+                                    <div className="review-admin-body">
+                                        <p className="review-book-title">
+                                            Betreft: <em>{commentaar.boek?.titel || 'Onbekend boek'}</em>
+                                        </p>
+                                        <blockquote className="review-text">
+                                            "{commentaar.tekst}"
+                                        </blockquote>
+                                    </div>
 
-                                    <p>
-                                        <strong>E-mailadres:</strong>{' '}
-                                        {commentaar.gebruiker?.email ||
-                                            'Niet beschikbaar'}
-                                    </p>
-
-                                    <p>
-                                        <strong>Score:</strong>{' '}
-                                        {'★'.repeat(commentaar.score || 0)}
-                                        {'☆'.repeat(
-                                            Math.max(0, 5 - (commentaar.score || 0))
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Beoordeling:</strong>
-                                    </p>
-
-                                    <p>{commentaar.tekst}</p>
-
-                                    <label>
-                                        <strong>Antwoord van de beheerder</strong>
+                                    <div className="review-admin-reply">
+                                        <label className="reply-label" htmlFor={`reply-${commentaar.id}`}>
+                                            Jouw antwoord (Beheerder)
+                                        </label>
                                         <textarea
+                                            id={`reply-${commentaar.id}`}
+                                            className="reply-textarea"
                                             value={antwoorden[commentaar.id] || ''}
                                             onChange={(event) =>
-                                                setAntwoorden((huidigeAntwoorden) => ({
-                                                    ...huidigeAntwoorden,
-                                                    [commentaar.id]:
-                                                    event.target.value,
+                                                setAntwoorden((huidige) => ({
+                                                    ...huidige,
+                                                    [commentaar.id]: event.target.value,
                                                 }))
                                             }
                                             maxLength={1000}
-                                            rows={4}
-                                            placeholder="Schrijf een antwoord..."
+                                            rows={3}
+                                            placeholder="Schrijf een professioneel antwoord..."
                                         />
-                                    </label>
-
-                                    <p>
-                                        <small>
-                                            {(antwoorden[commentaar.id] || '').length}
-                                            /1000 tekens
-                                        </small>
-                                    </p>
-
-                                    <button
-                                        className="button"
-                                        type="button"
-                                        disabled={
-                                            bezigMetId !== null ||
-                                            !(antwoorden[commentaar.id] || '').trim()
-                                        }
-                                        onClick={() =>
-                                            verstuurAntwoord(commentaar)
-                                        }
-                                    >
-                                        {bezigMetId === commentaar.id
-                                            ? 'Bezig...'
-                                            : commentaar.antwoord
-                                                ? 'Antwoord bijwerken'
-                                                : 'Antwoord versturen'}
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
+                                        <div className="reply-actions">
+                                            <span className="char-count">
+                                                {(antwoorden[commentaar.id] || '').length}/1000 tekens
+                                            </span>
+                                            <button
+                                                className="button button-small"
+                                                type="button"
+                                                disabled={bezigMetId !== null || !(antwoorden[commentaar.id] || '').trim()}
+                                                onClick={() => verstuurAntwoord(commentaar)}
+                                            >
+                                                {bezigMetId === commentaar.id
+                                                    ? 'Bezig...'
+                                                    : commentaar.antwoord
+                                                        ? 'Antwoord bijwerken'
+                                                        : 'Antwoord versturen'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </section>
                 )}
             </main>

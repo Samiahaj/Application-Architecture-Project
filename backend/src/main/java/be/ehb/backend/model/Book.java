@@ -28,7 +28,8 @@ public class Book {
     private String titel;
 
     @NotBlank(message = "Omschrijving mag niet leeg zijn")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+
     private String omschrijving;
 
     @NotNull(message = "Prijs is verplicht")
@@ -40,6 +41,8 @@ public class Book {
     @PositiveOrZero(message = "Voorraad mag niet negatief zijn")
     @Column(nullable = false)
     private Integer voorraad;
+
+    private String imageUrl;
 
     // Een boek kan meerdere auteurs hebben
     @ManyToMany
@@ -92,7 +95,13 @@ public class Book {
     public void setPrijs(BigDecimal prijs) {
         this.prijs = prijs;
     }
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
     public Integer getVoorraad() {
         return voorraad;
     }
@@ -106,7 +115,11 @@ public class Book {
     }
 
     // Hiermee kunnen we de auteurs van een boek aanpassen
+    // Hiermee kunnen we de auteurs van een boek aanpassen
     public void setAuteurs(List<Author> auteurs) {
-        this.auteurs = auteurs;
+        this.auteurs.clear();
+        if (auteurs != null) {
+            this.auteurs.addAll(auteurs);
+        }
     }
 }

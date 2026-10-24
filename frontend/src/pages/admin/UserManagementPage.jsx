@@ -22,10 +22,7 @@ export default function UserManagementPage() {
             const data = await apiFetch('/api/users');
             setGebruikers(Array.isArray(data) ? data : []);
         } catch (error) {
-            setFout(
-                error.message ||
-                'De gebruikers konden niet worden geladen.'
-            );
+            setFout(error.message || 'De gebruikers konden niet worden geladen.');
         } finally {
             setLaden(false);
         }
@@ -53,7 +50,7 @@ export default function UserManagementPage() {
         const nieuweRol = item.rol === 'ADMIN' ? 'USER' : 'ADMIN';
 
         const bevestiging = window.confirm(
-            `Wil je de rol van ${item.naam} wijzigen naar ${nieuweRol}?`
+            `Wil je de rol van ${item.naam} wijzigen naar ${nieuweRol === 'ADMIN' ? 'Beheerder' : 'Klant'}?`
         );
 
         if (!bevestiging) {
@@ -70,7 +67,7 @@ export default function UserManagementPage() {
                 body: JSON.stringify({ rol: nieuweRol }),
             });
 
-            setBericht(`De rol van ${item.naam} is gewijzigd.`);
+            setBericht(`De rol van ${item.naam} is succesvol gewijzigd.`);
             await laadGebruikers();
         } catch (error) {
             setFout(error.message || 'De rol kon niet worden gewijzigd.');
@@ -86,7 +83,7 @@ export default function UserManagementPage() {
         }
 
         const bevestiging = window.confirm(
-            `Weet je zeker dat je het account van ${item.naam} wilt verwijderen?`
+            `Weet je zeker dat je het account van ${item.naam} wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`
         );
 
         if (!bevestiging) {
@@ -110,10 +107,7 @@ export default function UserManagementPage() {
 
             setBericht(`Het account van ${item.naam} is verwijderd.`);
         } catch (error) {
-            setFout(
-                error.message ||
-                'Het account kon niet worden verwijderd.'
-            );
+            setFout(error.message || 'Het account kon niet worden verwijderd.');
         } finally {
             setBezigMetId(null);
         }
@@ -122,7 +116,7 @@ export default function UserManagementPage() {
     return (
         <PageLayout>
             <main className="dashboard-page">
-                <section className="section-heading">
+                <section className="dashboard-heading">
                     <div>
                         <p className="eyebrow">BOEKHAVEN · BEHEER</p>
                         <h1>Gebruikersbeheer</h1>
@@ -130,94 +124,100 @@ export default function UserManagementPage() {
                             Bekijk gebruikers, wijzig rollen en beheer accounts.
                         </p>
                     </div>
+
+                    <button
+                        className="button button-outline"
+                        type="button"
+                        onClick={laadGebruikers}
+                        disabled={laden || bezigMetId !== null}
+                    >
+                        ↻ Vernieuwen
+                    </button>
                 </section>
 
-                <div className="profile-actions">
+                <div style={{ marginBottom: '25px' }}>
                     <Link className="text-link" to="/admin">
                         ← Terug naar het dashboard
                     </Link>
                 </div>
 
-                <section className="profile-action-card">
-                    <div>
-                        <p className="eyebrow">GEBRUIKERS</p>
-                        <h2>Alle gebruikers ({gebruikers.length})</h2>
-                        <p>Zoek op naam, e-mailadres of rol.</p>
+                {bericht && (
+                    <div className="alert alert-success slide-in" role="status">
+                        {bericht}
                     </div>
+                )}
 
+                {fout && (
+                    <div className="alert alert-error slide-in" role="alert">
+                        {fout}
+                    </div>
+                )}
+
+                <section className="search-section fade-in">
                     <label className="search-box">
                         <span aria-hidden="true">⌕</span>
                         <input
                             type="search"
                             value={zoekterm}
                             onChange={(event) => setZoekterm(event.target.value)}
-                            placeholder="Zoek een gebruiker..."
+                            placeholder="Zoek op naam, e-mailadres of rol..."
                             aria-label="Zoek gebruikers"
                         />
                     </label>
                 </section>
 
-                {fout && (
-                    <div className="alert alert-error" role="alert">
-                        {fout}
-                    </div>
-                )}
-
-                {bericht && (
-                    <p className="status-message" role="status">
-                        {bericht}
-                    </p>
-                )}
-
                 {laden ? (
-                    <p className="status-message" role="status">
+                    <p className="status-message fade-in" role="status">
                         De gebruikers worden geladen...
                     </p>
                 ) : gefilterdeGebruikers.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>
-                            {zoekterm
-                                ? 'Geen gebruikers gevonden'
-                                : 'Geen gebruikers beschikbaar'}
-                        </h3>
+                    <div className="empty-state fade-in">
+                        <h3>Geen gebruikers gevonden</h3>
                         <p>
                             {zoekterm
                                 ? 'Probeer een andere zoekterm.'
-                                : 'Er zijn geen gebruikers gevonden.'}
+                                : 'Er zijn momenteel geen gebruikers geregistreerd.'}
                         </p>
                     </div>
                 ) : (
-                    <section className="user-management-section">
-                        <div className="table-container">
-                            <table className="management-table">
-                                <thead>
-                                <tr>
-                                    <th>Naam</th>
-                                    <th>E-mailadres</th>
-                                    <th>Rol</th>
-                                    <th>Acties</th>
-                                </tr>
-                                </thead>
+                    <div className="table-container fade-in">
+                        <table className="management-table">
+                            <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>E-mailadres</th>
+                                <th>Rol</th>
+                                <th>Acties</th>
+                            </tr>
+                            </thead>
 
-                                <tbody>
-                                {gefilterdeGebruikers.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>{item.naam}</td>
-                                        <td>{item.email}</td>
-                                        <td>
-                                            {item.rol === 'ADMIN'
-                                                ? 'Beheerder'
-                                                : 'Klant'}
-                                        </td>
-                                        <td>
-                                            <div className="profile-actions">
+                            <tbody>
+                            {gefilterdeGebruikers.map((item) => (
+                                <tr key={item.id}>
+                                    <td>
+                                        <strong style={{ color: 'var(--brown-dark)' }}>
+                                            {item.naam}
+                                        </strong>
+                                    </td>
+                                    <td>{item.email}</td>
+                                    <td>
+                                            <span
+                                                className={`status-pill ${item.rol === 'ADMIN' ? 'status-collected' : 'status-ready'}`}
+                                            >
+                                                {item.rol === 'ADMIN' ? 'Beheerder' : 'Klant'}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        {String(item.id) === String(gebruiker?.id) ? (
+                                            <span style={{ fontSize: '11px', color: 'var(--muted)', fontStyle: 'italic' }}>
+                                                    Jouw account
+                                                </span>
+                                        ) : (
+                                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                                 <button
-                                                    className="button"
+                                                    className="button button-outline button-small"
                                                     type="button"
-                                                    disabled={
-                                                        bezigMetId !== null ||
-                                                        String(item.id) === String(gebruiker?.id)
-                                                    }
+                                                    disabled={bezigMetId !== null}
                                                     onClick={() => wijzigRol(item)}
                                                 >
                                                     {bezigMetId === item.id
@@ -228,36 +228,22 @@ export default function UserManagementPage() {
                                                 </button>
 
                                                 <button
-                                                    className="button"
+                                                    className="text-button text-danger"
                                                     type="button"
-                                                    disabled={
-                                                        bezigMetId !== null ||
-                                                        String(item.id) === String(gebruiker?.id)
-                                                    }
+                                                    disabled={bezigMetId !== null}
                                                     onClick={() => verwijderGebruiker(item)}
                                                 >
                                                     Verwijderen
                                                 </button>
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
-
-                <div className="profile-actions">
-                    <button
-                        className="button"
-                        type="button"
-                        onClick={laadGebruikers}
-                        disabled={laden || bezigMetId !== null}
-                    >
-                        Vernieuwen
-                    </button>
-                </div>
             </main>
         </PageLayout>
     );
