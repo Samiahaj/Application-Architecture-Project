@@ -1,3 +1,9 @@
+/**
+ * Hoofdcomponent en router van de applicatie.
+ * Configureert alle openbare routes, beveiligde gebruikersroutes en beheerdersroutes
+ * met op rollen gebaseerde toegangscontrole en dynamische doorverwijzingen.
+ */
+
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useAuth } from './context/AuthContext.jsx';

@@ -1,8 +1,16 @@
+/**
+ * Detailpagina-component voor een individueel boek.
+ * Toont uitgebreide boekinformatie (inclusief afbeeldingen en auteurs), de voorraadstatus,
+ * de functionaliteit voor gebruikers om boeken te reserveren, en een sectie om recensies te bekijken, in te dienen of te beantwoorden.
+ */
+
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
+
+
 
 function auteursTekst(boek) {
     if (!Array.isArray(boek?.auteurs) || boek.auteurs.length === 0) {

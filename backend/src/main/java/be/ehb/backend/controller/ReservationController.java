@@ -1,5 +1,9 @@
 package be.ehb.backend.controller;
-
+/**
+ * REST Controller voor het beheren van reserveringen.
+ * Behandelt het aanmaken van reserveringen, het opvragen van gebruikersspecifieke
+ * of alle reserveringen, en het bijwerken van de reserveringsstatus.
+ */
 import be.ehb.backend.model.Reservation;
 import be.ehb.backend.model.ReservationStatus;
 import be.ehb.backend.model.User;

@@ -1,7 +1,14 @@
+/**
+ * Beheerderscomponent voor commentaar- en beoordelingsbeheer.
+ * Biedt een overzicht van klantrecensies per boek, inclusief sterrenbeoordelingen,
+ * gebruikersgegevens en de functionaliteit om als beheerder professionele antwoorden toe te voegen of bij te werken.
+ */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';
 import PageLayout from '../../components/PageLayout.jsx';
+
+
 
 export default function CommentManagementPage() {
     const [commentaren, setCommentaren] = useState([]);

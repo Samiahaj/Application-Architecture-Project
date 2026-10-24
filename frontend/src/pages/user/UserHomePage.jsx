@@ -1,3 +1,8 @@
+/**
+ * Startpagina-component van de applicatie.
+ * Biedt een introductie-hero, realtime zoekfunctionaliteit voor de boekencollectie,
+ * en een overzicht van beschikbare boeken met prijzen, voorraad en omslagen.
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';

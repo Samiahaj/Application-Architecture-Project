@@ -1,5 +1,9 @@
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor het beheren van reserveringen.
+ * Bevat de bedrijfslogica voor het aanmaken van reserveringen, bijbehorend voorraadbeheer,
+ * het opvragen van reserveringen en het verwerken van statusovergangen.
+ */
 import be.ehb.backend.model.Book;
 import be.ehb.backend.model.Reservation;
 import be.ehb.backend.model.ReservationStatus;

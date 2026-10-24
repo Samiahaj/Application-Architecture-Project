@@ -1,3 +1,8 @@
+/**
+ * Beheerderscomponent voor het beheren van de boekencollectie.
+ * Biedt functionaliteit voor het opzoeken, toevoegen, bewerken en verwijderen van boeken
+ * (inclusief beheer van boekomslagen via bestandsuploads en het koppelen van auteurs).
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';

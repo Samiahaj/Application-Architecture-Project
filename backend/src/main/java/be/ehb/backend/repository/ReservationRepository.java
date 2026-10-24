@@ -1,5 +1,9 @@
 package be.ehb.backend.repository;
-
+/**
+ * Repository-interface voor reserveringsbeheer.
+ * Biedt standaard CRUD-operaties en aangepaste zoekmethodes om reserveringen
+ * op te halen per gebruiker, per boek of op basis van een specifieke status.
+ */
 import be.ehb.backend.model.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import be.ehb.backend.model.ReservationStatus;

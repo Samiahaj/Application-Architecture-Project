@@ -1,9 +1,12 @@
 package be.ehb.backend.controller;
-
+/**
+ * REST Controller voor het beheren van boeken.
+ * Biedt endpoints voor CRUD-operaties, bestandsuploads (boekomslagen)
+ * en het koppelen van auteurs aan boeken.
+ */
 import be.ehb.backend.model.Book;
 import be.ehb.backend.service.BookService;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;

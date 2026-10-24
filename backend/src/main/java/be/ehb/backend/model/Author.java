@@ -1,6 +1,10 @@
 // Stelt een auteur voor
 package be.ehb.backend.model;
-
+/**
+ * Entiteit die een auteur voorstelt in de database.
+ * Bevat de naam van de auteur en een gekoppelde lijst van boeken
+ * via een vele-op-vele relatie (ManyToMany).
+ */
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.ArrayList;

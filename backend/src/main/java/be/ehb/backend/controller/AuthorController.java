@@ -1,4 +1,9 @@
-// Beheert de HTTP-aanvragen voor auteurs
+
+
+/**
+ * REST Controller voor het beheren van auteurs.
+ * Biedt endpoints voor het opvragen, toevoegen, bijwerken en verwijderen van auteursgegevens.
+ */
 package be.ehb.backend.controller;
 
 import be.ehb.backend.model.Author;

@@ -1,5 +1,9 @@
 package be.ehb.backend.controller;
-
+/**
+ * REST Controller voor gebruikersbeheer en authenticatie.
+ * Behandelt registratie, beveiligde login met blokkeringscontrole, profiel- en wachtwoordbeheer,
+ * en administratieve acties zoals het wijzigen van rollen en het blokkeren/deblokkeren van accounts.
+ */
 import be.ehb.backend.model.User;
 import be.ehb.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;

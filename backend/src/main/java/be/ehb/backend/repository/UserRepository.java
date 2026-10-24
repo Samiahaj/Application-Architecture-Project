@@ -1,5 +1,9 @@
 package be.ehb.backend.repository;
-
+/**
+ * Repository-interface voor gebruikersbeheer.
+ * Biedt databankoperaties voor gebruikers en handige methodes
+ * om gebruikers te zoeken of te controleren op e-mailadres voor authenticatie.
+ */
 import be.ehb.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,3 +1,8 @@
+/**
+ * Admin-dashboardcomponent die de hoofdpagina vormt voor het beheerdersgedeelte.
+ * Biedt een overzichtelijk raster van beheeropties voor boeken, gebruikers, reserveringen en commentaren.
+ */
+
 import { Link } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout.jsx';
 

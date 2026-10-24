@@ -1,3 +1,8 @@
+/**
+ * Beheerderscomponent voor gebruikersbeheer.
+ * Biedt een overzicht van alle geregistreerde gebruikers, inclusief zoek- en filteropties,
+ * de functionaliteit om rollen te wijzigen (Beheerder/Klant), en opties om accounts te blokkeren of te deblokkeren.
+ */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../../components/PageLayout.jsx';

@@ -1,5 +1,9 @@
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor het beheren van recensies en beoordelingen.
+ * Bevat de bedrijfslogica voor het valideren en aanmaken van reviews (inclusief controle op opgehaalde boeken),
+ * het opvragen van reviews, en het opslaan van beheerdersantwoorden.
+ */
 import be.ehb.backend.model.Book;
 import be.ehb.backend.model.Reservation;
 import be.ehb.backend.model.ReservationStatus;

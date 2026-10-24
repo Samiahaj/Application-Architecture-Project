@@ -1,7 +1,13 @@
+/**
+ * Beheerderscomponent voor reserveringsbeheer.
+ * Biedt een overzicht van alle reserveringen in de applicatie, inclusief filtermogelijkheden,
+ * klant- en boekgegevens, en de functionaliteit om reserveringsstatussen live bij te werken.
+ */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';
 import PageLayout from '../../components/PageLayout.jsx';
+
 
 const statussen = {
     PENDING: 'In afwachting',

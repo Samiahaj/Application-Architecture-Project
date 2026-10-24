@@ -1,3 +1,9 @@
+/**
+ * Registratiepagina-component van de applicatie.
+ * Beheert het registratieformulier voor nieuwe gebruikers, invoervalidatie (wachtwoordlengte en bevestiging),
+ * de API-aanroep voor accountaanmaak en automatische omleiding naar de inlogpagina bij succes.
+ */
+
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/api.js';

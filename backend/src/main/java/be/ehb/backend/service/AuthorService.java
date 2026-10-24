@@ -1,6 +1,10 @@
 // Beheert de logica voor auteurs
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor het beheren van auteurs.
+ * Bevat de bedrijfslogica voor het opvragen, toevoegen, bijwerken en verwijderen van auteurs,
+ * inclusief het opschonen van relaties met gekoppelde boeken voorafgaand aan verwijdering.
+ */
 import be.ehb.backend.model.Author;
 import be.ehb.backend.repository.AuthorRepository;
 import org.springframework.stereotype.Service;

@@ -1,3 +1,9 @@
+/**
+ * Inlogpagina-component van de applicatie.
+ * Beheert het inlogformulier, de authenticatie via de API, sessie-updates
+ * en automatische omleidingen op basis van de gebruikersrol of eerdere navigatiebestemmingen.
+ */
+
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/api.js';

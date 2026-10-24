@@ -9,16 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
-import java.math.BigDecimal;
-import java.util.Optional;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -34,112 +28,86 @@ class BookServiceTest {
 
     @Test
     void getAllBooksReturnsBooks() {
-        // Maakt een lijst met twee testboeken
         List<Book> boeken = List.of(new Book(), new Book());
-
-        // Geeft de testboeken terug
         when(bookRepository.findAll()).thenReturn(boeken);
 
-        // Haalt alle boeken op
         List<Book> resultaat = bookService.getAllBooks();
 
-        // Controleert of er twee boeken zijn
         assertEquals(2, resultaat.size());
     }
+
     @Test
     void getAllBooksReturnsEmptyList() {
-        // Geeft een lege lijst terug
         when(bookRepository.findAll()).thenReturn(List.of());
 
-        // Haalt alle boeken op
         List<Book> resultaat = bookService.getAllBooks();
 
-        // Controleert of de lijst leeg is
         assertEquals(0, resultaat.size());
     }
+
     @Test
     void getBookByIdReturnsBookWhenFound() {
-        // Maakt een testboek
         Book boek = new Book();
         boek.setId(1L);
 
-        // Geeft het testboek terug voor ID 1
         when(bookRepository.findById(1L)).thenReturn(Optional.of(boek));
 
-        // Haalt het boek op
         Optional<Book> resultaat = bookService.getBookById(1L);
 
-// Controleert of het boek gevonden is
-        assertEquals(true, resultaat.isPresent());
-
-// Controleert of het juiste boek wordt teruggegeven
+        assertTrue(resultaat.isPresent());
         assertEquals(1L, resultaat.get().getId());
     }
+
     @Test
     void getBookByIdReturnsEmptyWhenBookNotFound() {
-        // Geeft aan dat het boek niet bestaat
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Zoekt een boek dat niet bestaat
         Optional<Book> resultaat = bookService.getBookById(999L);
 
-        // Controleert of er geen boek gevonden is
-        assertEquals(true, resultaat.isEmpty());
+        assertTrue(resultaat.isEmpty());
     }
+
     @Test
-    void addBookSavesBook() {
-        // Maakt een testboek
+    void addBookWithFileSavesBook() {
         Book boek = new Book();
         boek.setTitel("Testboek");
 
-        // Geeft het boek terug wanneer het wordt opgeslagen
-        when(bookRepository.save(boek)).thenReturn(boek);
+        when(bookRepository.save(any(Book.class))).thenReturn(boek);
 
-        // Voegt het boek toe
-        Book resultaat = bookService.addBook(boek);
+        // Test de methode met null voor afbeelding en auteurs (indien niet verplicht)
+        Book resultaat = bookService.addBookWithFile(boek, null, null);
 
-        // Controleert of het juiste boek wordt teruggegeven
         assertEquals("Testboek", resultaat.getTitel());
+        verify(bookRepository).save(boek);
     }
+
     @Test
-    void updateBookUpdatesExistingBook() {
-        // Maakt een bestaand boek
+    void updateBookWithFileUpdatesExistingBook() {
         Book bestaandBoek = new Book();
         bestaandBoek.setId(1L);
         bestaandBoek.setTitel("Oude titel");
 
-        // Maakt de nieuwe gegevens
-        Book nieuwBoek = new Book();
-        nieuwBoek.setTitel("Nieuwe titel");
+        Book nieuwBoekDetails = new Book();
+        nieuwBoekDetails.setTitel("Nieuwe titel");
 
-        // Geeft het bestaande boek terug
-        when(bookRepository.findById(1L))
-                .thenReturn(Optional.of(bestaandBoek));
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(bestaandBoek));
+        when(bookRepository.save(any(Book.class))).thenReturn(bestaandBoek);
 
-        when(bookRepository.save(bestaandBoek))
-                .thenReturn(bestaandBoek);
+        Book resultaat = bookService.updateBookWithFile(1L, nieuwBoekDetails, null, null);
 
-        // Past het boek aan
-        Book resultaat = bookService.updateBook(1L, nieuwBoek);
-
-        // Controleert of de titel aangepast is
         assertEquals("Nieuwe titel", resultaat.getTitel());
+        verify(bookRepository).save(bestaandBoek);
     }
+
     @Test
     void deleteBookDeletesExistingBook() {
-        // Maakt een bestaand boek
-        Book boek = new Book();
-        boek.setId(1L);
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(bookRepository).deleteById(1L);
 
-        // Geeft het boek terug
-        when(bookRepository.findById(1L))
-                .thenReturn(Optional.of(boek));
+        boolean resultaat = bookService.deleteBook(1L);
 
-        // Verwijdert het boek
-        bookService.deleteBook(1L);
-
-        // Controleert of het boek verwijderd werd
-        verify(bookRepository).delete(boek);
+        assertTrue(resultaat);
+        verify(bookRepository).existsById(1L);
+        verify(bookRepository).deleteById(1L);
     }
-
 }

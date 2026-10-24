@@ -1,5 +1,10 @@
+/**
+ * Beveiligde route-component die de toegang tot specifieke pagina's controleert op basis van
+ * authenticatiestatus en gebruikersrollen, en indien nodig omleidt naar de inlogpagina of startpagina.
+ */
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+
 
 export default function ProtectedRoute({ role }) {
     const { gebruiker, authLaden } = useAuth();

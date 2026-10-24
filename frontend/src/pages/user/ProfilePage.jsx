@@ -1,3 +1,8 @@
+/**
+ * Profielpagina-component voor ingelogde gebruikers.
+ * Biedt een overzicht van persoonlijke gegevens, en stelt gebruikers in staat om hun naam,
+ * e-mailadres en wachtwoord bij te werken, met snelle navigatie naar reserveringen en de collectie.
+ */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';

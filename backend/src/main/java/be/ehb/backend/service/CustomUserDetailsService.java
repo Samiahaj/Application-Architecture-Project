@@ -1,5 +1,8 @@
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor gebruikersauthenticatie binnen Spring Security.
+ * Laadt gebruikersgegevens op basis van het e-mailadres om de inlogstatus en autorisatie te valideren.
+ */
 import be.ehb.backend.model.User;
 import be.ehb.backend.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,3 +1,8 @@
+/**
+ * Authenticatiecontext en -provider voor de applicatie.
+ * Beheert de gebruikerssessie, laadt het actieve gebruikersprofiel via de API
+ * en stelt authenticatiestatus en helperfuncties ter beschikking via een React context.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '../api/api.js';
 

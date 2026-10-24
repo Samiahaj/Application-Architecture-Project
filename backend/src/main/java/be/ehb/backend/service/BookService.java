@@ -1,5 +1,9 @@
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor het beheren van boeken.
+ * Bevat de bedrijfslogica voor CRUD-operaties, het opslaan en verwerken van boekomslagen (bestandsuploads),
+ * en het koppelen van auteurs aan boeken.
+ */
 import be.ehb.backend.model.Author;
 import be.ehb.backend.model.Book;
 import be.ehb.backend.repository.AuthorRepository;

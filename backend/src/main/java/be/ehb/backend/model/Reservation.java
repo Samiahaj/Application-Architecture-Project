@@ -1,5 +1,8 @@
 package be.ehb.backend.model;
-
+/**
+ * Entiteit die een reservering voorstelt in de database.
+ * Koppelt een gebruiker aan een gereserveerd boek en houdt de reserveringsdatum en actuele status bij.
+ */
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

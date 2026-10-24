@@ -1,4 +1,8 @@
 package be.ehb.backend.dto;
+/**
+ * Data Transfer Object (DTO) voor inlogverzoeken.
+ * Bevat gevalideerde velden voor het e-mailadres en het wachtwoord.
+ */
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

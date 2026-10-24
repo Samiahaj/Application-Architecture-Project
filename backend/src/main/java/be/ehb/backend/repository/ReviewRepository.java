@@ -1,5 +1,9 @@
 package be.ehb.backend.repository;
-
+/**
+ * Repository-interface voor recensies en beoordelingen.
+ * Biedt databankoperaties voor reviews en handige controlefuncties,
+ * zoals het ophalen per boek en verifiëren of een gebruiker al een review heeft geplaatst.
+ */
 import be.ehb.backend.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 

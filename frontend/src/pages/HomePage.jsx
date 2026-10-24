@@ -1,3 +1,10 @@
+/**
+ * Openbare startpagina-component van de applicatie.
+ * Toont een introductie-hero met inspirerende teksten, realtime zoek- en filterfunctionaliteit
+ * voor de volledige boekencollectie, prijzen, voorraadstatus en dynamische boekomslagen.
+ */
+
+
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../api/api.js';

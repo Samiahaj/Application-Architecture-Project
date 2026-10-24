@@ -1,5 +1,9 @@
 package be.ehb.backend.model;
-
+/**
+ * Entiteit die een gebruiker voorstelt in de database.
+ * Bevat persoonsgegevens, beveiligd wachtwoord, gebruikersrol (USER/ADMIN)
+ * en een actieve statusvlag voor accountblokkering.
+ */
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,5 +1,9 @@
 package be.ehb.backend.model;
-
+/**
+ * Entiteit die een recensie of beoordeling voorstelt in de database.
+ * Koppelt een gebruiker aan een boek met een score, reviewtekst
+ * en een eventueel antwoord van een beheerder.
+ */
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

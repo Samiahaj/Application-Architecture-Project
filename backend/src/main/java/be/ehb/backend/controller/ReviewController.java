@@ -1,5 +1,9 @@
 package be.ehb.backend.controller;
-
+/**
+ * REST Controller voor het beheren van recensies en beoordelingen.
+ * Biedt endpoints voor het indienen van reviews, opvragen per boek of overzicht,
+ * en het beantwoorden van reviews door beheerders.
+ */
 import be.ehb.backend.model.Review;
 import be.ehb.backend.model.User;
 import be.ehb.backend.repository.UserRepository;

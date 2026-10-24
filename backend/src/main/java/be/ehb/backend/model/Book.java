@@ -1,6 +1,10 @@
 // Stelt een boek voor
 package be.ehb.backend.model;
-
+/**
+ * Entiteit die een boek voorstelt in de database.
+ * Bevat eigenschappen zoals ISBN, titel, omschrijving, prijs, voorraad, afbeelding
+ * en een vele-op-vele relatie met auteurs.
+ */
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

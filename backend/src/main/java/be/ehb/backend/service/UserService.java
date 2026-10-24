@@ -1,5 +1,9 @@
 package be.ehb.backend.service;
-
+/**
+ * Service-laag voor gebruikersbeheer en authenticatie.
+ * Bevat de bedrijfslogica voor gebruikersregistratie, wachtwoordversleuteling, profiel- en wachtwoordbeheer,
+ * rolwijzigingen, en het beheren van de actieve status (blokkeren en deblokkeren) van accounts.
+ */
 import be.ehb.backend.model.User;
 import be.ehb.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

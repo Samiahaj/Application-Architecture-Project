@@ -1,5 +1,9 @@
 const API_BASE_URL = 'http://localhost:8080';
-
+/**
+ * Utility-functie voor het uitvoeren van HTTP-verzoeken naar de backend API.
+ * Beheert automatisch credentials, content-type headers voor JSON en FormData,
+ * centrale foutafhandeling en het parsen van antwoorden.
+ */
 export async function apiFetch(path, options = {}) {
     const isFormData = options.body instanceof FormData;
 

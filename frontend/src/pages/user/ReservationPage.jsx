@@ -1,8 +1,14 @@
+/**
+ * Component voor het overzicht van de reserveringen van de ingelogde gebruiker.
+ * Toont alle reserveringen inclusief status, boekdetails en directe links om de betreffende boeken te bekijken.
+ */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../api/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
+
+
 
 const statussen = {
     PENDING: 'In afwachting',

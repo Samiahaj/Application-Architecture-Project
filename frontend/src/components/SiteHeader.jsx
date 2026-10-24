@@ -1,3 +1,9 @@
+/**
+ * Header-component van de applicatie. Biedt navigatie,
+ * dynamische menu-opties op basis van de gebruikersrol (gast, USER of ADMIN)
+ * en de functionaliteit om veilig uit te loggen.
+ */
+
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
