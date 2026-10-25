@@ -84,7 +84,10 @@ public class SecurityConfig {
                                 org.springframework.http.HttpMethod.PUT,
                                 "/api/books/**"
                         ).hasRole("ADMIN")
-
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.DELETE,
+                                "/api/books/**"
+                        ).hasRole("ADMIN")
 
                         // Alleen beheerders mogen auteurs beheren
                         .requestMatchers(
@@ -114,10 +117,7 @@ public class SecurityConfig {
                                 "/api/users/*/role"
                         ).hasRole("ADMIN")
 
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.DELETE,
-                                "/api/users/*"
-                        ).hasRole("ADMIN")
+
 
                         // Alleen beheerders mogen reserveringsstatussen wijzigen
                         .requestMatchers(

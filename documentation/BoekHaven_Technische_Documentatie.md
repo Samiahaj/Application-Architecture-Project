@@ -57,8 +57,10 @@ samiahaj-application-architecture-project/
 │       └── pages/
 │           ├── admin/
 │           └── user/
-└── planning/
-    └── ProjectPlanning.docx
+|── planning/
+|    └── ProjectPlanning.md
+|── Documentation
+    └── BoekHaven_Technische_Documentatie.md
 ```
 
 ## 4. Architectuur van de applicatie
