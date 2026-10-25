@@ -85,10 +85,6 @@ public class SecurityConfig {
                                 "/api/books/**"
                         ).hasRole("ADMIN")
 
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.DELETE,
-                                "/api/books/**"
-                        ).hasRole("ADMIN")
 
                         // Alleen beheerders mogen auteurs beheren
                         .requestMatchers(

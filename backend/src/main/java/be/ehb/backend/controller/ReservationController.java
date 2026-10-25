@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Map;
 
@@ -31,10 +32,9 @@ public class ReservationController {
         this.userRepository = userRepository;
     }
     // Haalt alle reservaties op voor de beheerder
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getAllReservations(
-            Authentication authentication) {
-
+    public ResponseEntity<?> getAllReservations() {
         return ResponseEntity.ok(
                 reservationService.getAllReservations()
         );

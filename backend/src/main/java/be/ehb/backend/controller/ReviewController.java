@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -37,11 +38,13 @@ public class ReviewController {
         this.userRepository = userRepository;
     }
     // Haalt alle beoordelingen op voor de beheerder
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<?> getAllReviews() {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
     // Beantwoordt een beoordeling (alleen voor beheerders)
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{reviewId}/answer")
     public ResponseEntity<?> answerReview(
             @PathVariable Long reviewId,
