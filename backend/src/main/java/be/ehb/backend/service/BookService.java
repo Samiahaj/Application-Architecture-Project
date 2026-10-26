@@ -26,7 +26,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
 
-    // Dossier local où les images seront stockées sur le serveur (Ubuntu)
+
     private final String UPLOAD_DIR = "uploads/";
 
     public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
@@ -64,7 +64,7 @@ public class BookService {
         book.setPrijs(bookDetails.getPrijs());
         book.setVoorraad(bookDetails.getVoorraad());
 
-        // Si une nouvelle image est sélectionnée depuis le PC, on la remplace
+
         if (imageFile != null && !imageFile.isEmpty()) {
             handleImageUpload(book, imageFile);
         }
@@ -97,7 +97,7 @@ public class BookService {
         return null;
     }
 
-    // Méthode utilitaire pour enregistrer le fichier image sur le disque
+
     private void handleImageUpload(Book book, MultipartFile imageFile) {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
@@ -106,12 +106,12 @@ public class BookService {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Générer un nom unique pour éviter les conflits de fichiers
+
                 String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
                 Path filePath = uploadPath.resolve(fileName);
                 Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Sauvegarder l'URL publique de l'image dans l'entité Book
+
                 book.setImageUrl("http://localhost:8080/uploads/" + fileName);
             } catch (IOException e) {
                 throw new RuntimeException("Fout bij het opslaan van de afbeelding: " + e.getMessage());
@@ -119,7 +119,7 @@ public class BookService {
         }
     }
 
-    // Méthode utilitaire pour lier les auteurs par leurs IDs
+
     private void handleAuthors(Book book, List<Long> authorIds) {
         if (authorIds != null) {
             List<Author> auteurs = authorRepository.findAllById(authorIds);

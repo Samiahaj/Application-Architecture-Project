@@ -40,25 +40,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User loginUser(String email, String wachtwoord) {
 
-        User user = userRepository.findByEmail(email);
-
-        if (user == null
-                || !passwordEncoder.matches(
-                wachtwoord, user.getWachtwoord())) {
-            throw new IllegalArgumentException(
-                    "E-mailadres of wachtwoord is onjuist");
-        }
-
-
-        if (!user.isActief()) {
-            throw new IllegalArgumentException(
-                    "Dit account is geblokkeerd door een beheerder.");
-        }
-
-        return user;
-    }
 
     // Haalt een gebruiker op via het e-mailadres
     public User getUserByEmail(String email) {

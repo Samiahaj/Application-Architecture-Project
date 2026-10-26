@@ -61,14 +61,14 @@ public class UserController {
             HttpServletResponse response) {
 
         try {
-            // 1. Vérifier d'abord si l'utilisateur existe et s'il est bloqué
+
             User userCheck = userService.getUserByEmail(loginRequest.getEmail());
             if (!userCheck.isActief()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Dit account is geblokkeerd door een beheerder.");
             }
 
-            // 2. Si actif, Spring Security procède à l'authentification normale
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
@@ -90,7 +90,7 @@ public class UserController {
             return ResponseEntity.ok(user);
 
         } catch (Exception e) {
-            // Si le compte est bloqué, on renvoie le message spécifique
+
             if (e.getMessage() != null && e.getMessage().contains("geblokkeerd")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
             }
