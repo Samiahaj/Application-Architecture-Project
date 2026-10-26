@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import java.util.List;
 
@@ -40,7 +41,40 @@ public class BookController {
 
         return ResponseEntity.notFound().build();
     }
+    private ResponseEntity<Map<String, String>> validateBookFields(
+            String titel,
+            String isbn,
+            String omschrijving,
+            BigDecimal prijs,
+            Integer voorraad) {
 
+        if (titel == null || titel.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Titel is verplicht."));
+        }
+
+        if (isbn == null || isbn.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "ISBN is verplicht."));
+        }
+
+        if (omschrijving == null || omschrijving.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Omschrijving is verplicht."));
+        }
+
+        if (prijs == null || prijs.compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Prijs moet groter zijn dan nul."));
+        }
+
+        if (voorraad == null || voorraad < 0) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Voorraad mag niet negatief zijn."));
+        }
+
+        return null;
+    }
     @PostMapping
     public ResponseEntity<?> addBook(
             @RequestParam("titel") String titel,
@@ -51,7 +85,14 @@ public class BookController {
             @RequestParam("voorraad") Integer voorraad,
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
             @RequestParam(value = "auteurIds", required = false) List<Long> auteurIds) {
+
         try {
+            ResponseEntity<Map<String, String>> validationError =
+                    validateBookFields(titel, isbn, omschrijving, prijs, voorraad);
+
+            if (validationError != null) {
+                return validationError;
+            }
             Book book = new Book();
             book.setTitel(titel);
             book.setIsbn(isbn);
@@ -81,6 +122,12 @@ public class BookController {
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
             @RequestParam(value = "auteurIds", required = false) List<Long> auteurIds) {
         try {
+            ResponseEntity<Map<String, String>> validationError =
+                    validateBookFields(titel, isbn, omschrijving, prijs, voorraad);
+
+            if (validationError != null) {
+                return validationError;
+            }
             Book bookDetails = new Book();
             bookDetails.setTitel(titel);
             bookDetails.setIsbn(isbn);

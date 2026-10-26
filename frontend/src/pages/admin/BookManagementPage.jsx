@@ -243,22 +243,39 @@ export default function BookManagementPage() {
             setFout('Vul de titel van het boek in.');
             return;
         }
+
+        if (!formulier.isbn.trim()) {
+            setFout('Vul het ISBN van het boek in.');
+            return;
+        }
+
+        if (!formulier.omschrijving.trim()) {
+            setFout('Vul de beschrijving van het boek in.');
+            return;
+        }
+
         if (!Array.isArray(formulier.genres) || formulier.genres.length === 0) {
             setFout('Selecteer minstens één genre voor het boek.');
             return;
         }
 
-        if (formulier.prijs === '' || Number(formulier.prijs) < 0) {
-            setFout('Vul een geldige prijs in.');
+        if (
+            formulier.prijs === '' ||
+            !Number.isFinite(Number(formulier.prijs)) ||
+            Number(formulier.prijs) <= 0
+        ) {
+            setFout('Vul een prijs groter dan nul in.');
             return;
         }
 
-        if (formulier.voorraad === '' || !Number.isInteger(Number(formulier.voorraad)) || Number(formulier.voorraad) < 0) {
-            setFout('Vul een geldige voorraad in.');
+        if (
+            formulier.voorraad === '' ||
+            !Number.isInteger(Number(formulier.voorraad)) ||
+            Number(formulier.voorraad) < 0
+        ) {
+            setFout('Vul een geldige voorraad in. De voorraad mag niet negatief zijn.');
             return;
         }
-
-        // Utilisation de FormData pour envoyer le fichier du PC
         const formData = new FormData();
         formData.append('isbn', formulier.isbn.trim());
         formData.append('titel', formulier.titel.trim());
@@ -280,7 +297,7 @@ export default function BookManagementPage() {
         setOpslaan(true);
 
         try {
-            // Note: Ton apiFetch ne doit pas forcer Content-Type: application/json si le body est un FormData
+
             if (bewerkenId !== null) {
                 await apiFetch(`/api/books/${bewerkenId}`, {
                     method: 'PUT',
@@ -359,7 +376,7 @@ export default function BookManagementPage() {
                             </div>
                         </div>
 
-                        <form className="form-stack" onSubmit={verstuurFormulier}>
+                        <form className="form-stack" onSubmit={verstuurFormulier} noValidate>
                             <div className="form-grid">
                                 <div>
                                     <label htmlFor="isbn">ISBN</label>
