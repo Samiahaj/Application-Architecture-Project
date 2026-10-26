@@ -8,13 +8,14 @@ Beheerders kunnen boeken en auteurs beheren, gebruikers beheren, reserveringen o
 ## 2. Technologieën
 
 ### Backend
-- **Java 21** — programmeertaal voor de serverlogica.
+- **Java JDK 25.0.3** — programmeertaal voor de serverlogica.
+- **Java target version 21** — de doelversie die in pom.xml is ingesteld.
 - **Spring Boot 4.1.1** — framework voor de backend.
 - **Spring Web MVC** — verwerkt HTTP-aanvragen en API-antwoorden.
 - **Spring Data JPA / Hibernate** — koppelt Java-entiteiten aan relationele databasegegevens.
 - **Spring Security** — verzorgt authenticatie, sessiebeheer en toegangsregels.
 - **Bean Validation** — valideert invoer, zoals verplichte velden en toegestane waarden.
-- **Maven** — beheert dependencies en de build van de backend.
+- **Apache Maven 3.9.16** — beheert dependencies en de build van de backend.
 - **MySQL Connector/J** — maakt de verbinding met MySQL mogelijk.
 
 ### Frontend

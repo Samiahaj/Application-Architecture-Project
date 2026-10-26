@@ -29,6 +29,7 @@ export default function ReservationManagementPage() {
     const [fout, setFout] = useState('');
     const [bericht, setBericht] = useState('');
     const [zoekterm, setZoekterm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
     const [bezigMetWijzigen, setBezigMetWijzigen] = useState(null);
 
     async function laadReserveringen() {
@@ -49,21 +50,36 @@ export default function ReservationManagementPage() {
         laadReserveringen();
     }, []);
 
-    const gefilterdeReserveringen = reserveringen.filter((reservering) => {
-        const term = zoekterm.trim().toLocaleLowerCase('nl');
-        if (!term) return true;
+    const gefilterdeReserveringen = [...reserveringen]
+        .sort((a, b) => {
+            const datumA = a.reservatieDatum ? new Date(a.reservatieDatum).getTime() : 0;
+            const datumB = b.reservatieDatum ? new Date(b.reservatieDatum).getTime() : 0;
+            return datumB - datumA;
+        })
+        .filter((reservering) => {
+            const term = zoekterm.trim().toLocaleLowerCase('nl');
 
-        const boekTitel = reservering.boek?.titel || '';
-        const gebruikerNaam = reservering.gebruiker?.naam || '';
-        const gebruikerEmail = reservering.gebruiker?.email || '';
-        const reserveringId = String(reservering.id || '');
+    const boekTitel = reservering.boek?.titel || '';
+    const gebruikerNaam = reservering.gebruiker?.naam || '';
+    const gebruikerEmail = reservering.gebruiker?.email || '';
+    const reserveringId = String(reservering.id || '');
 
-        return `${boekTitel} ${gebruikerNaam} ${gebruikerEmail} ${reserveringId}`
+    const komtOvereenMetZoekterm =
+        `${boekTitel} ${gebruikerNaam} ${gebruikerEmail} ${reserveringId}`
             .toLocaleLowerCase('nl')
             .includes(term);
-    });
 
-    async function wijzigStatus(reserveringId, nieuweStatus) {
+    const komtOvereenMetStatus =
+        statusFilter === 'ALL' || reservering.status === statusFilter;
+
+    return komtOvereenMetZoekterm && komtOvereenMetStatus;
+});
+
+
+
+
+
+            async function wijzigStatus(reserveringId, nieuweStatus) {
         setFout('');
         setBericht('');
         setBezigMetWijzigen(reserveringId);
@@ -124,8 +140,16 @@ export default function ReservationManagementPage() {
                 {bericht && <div className="alert alert-success slide-in">{bericht}</div>}
                 {fout && <div className="alert alert-error slide-in">{fout}</div>}
 
-                <section className="search-section fade-in">
-                    <label className="search-box">
+                <section
+                    className="search-section fade-in"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    <label className="search-box" style={{ flex: '1', minWidth: '250px' }}>
                         <span aria-hidden="true">⌕</span>
                         <input
                             type="search"
@@ -135,7 +159,32 @@ export default function ReservationManagementPage() {
                             aria-label="Zoek reserveringen"
                         />
                     </label>
+
+
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
+        Filter op status:
+    </span>
+
+                        <select
+                            value={statusFilter}
+                            onChange={(event) => setStatusFilter(event.target.value)}
+                            aria-label="Filter reserveringen op status"
+                            style={{
+                                width: '180px',height:'35px', padding: '5px 6px', borderRadius: '8px', border: '1px solid var(--line)', background: 'var(--white)', color: 'var(--brown-dark)', fontSize: '12px', cursor: 'pointer'
+                            }}
+                        >
+                            <option value="ALL">Alle statussen</option>
+                            <option value="PENDING">In afwachting</option>
+                            <option value="READY">Klaar om afgehaald te worden</option>
+                            <option value="COLLECTED">Afgehaald</option>
+                            <option value="CANCELLED">Geannuleerd</option>
+                        </select>
+                    </label>
+
+
                 </section>
+
 
                 {laden && (
                     <p className="status-message fade-in">

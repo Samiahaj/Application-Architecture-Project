@@ -17,6 +17,7 @@ export default function CommentManagementPage() {
     const [bezigMetId, setBezigMetId] = useState(null);
     const [fout, setFout] = useState('');
     const [bericht, setBericht] = useState('');
+    const [scoreFilter, setScoreFilter] = useState('ALL');
 
     async function laadCommentaren() {
         setLaden(true);
@@ -117,19 +118,62 @@ export default function CommentManagementPage() {
                         {fout}
                     </div>
                 )}
-
+                {!laden && commentaren.length > 0 && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        marginBottom: '20px'
+                    }}>
+                        <select
+                            value={scoreFilter}
+                            onChange={(event) => setScoreFilter(event.target.value)}
+                            aria-label="Filter beoordelingen op aantal sterren"
+                            style={{
+                                width: '180px',
+                                height: '35px',
+                                boxSizing: 'border-box',
+                                padding: '5px 6px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--line)',
+                                background: 'var(--white)',
+                                color: 'var(--brown-dark)',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="ALL">Alle beoordelingen</option>
+                            <option value="5">★★★★★ — 5 sterren</option>
+                            <option value="4">★★★★ — 4 sterren</option>
+                            <option value="3">★★★ — 3 sterren</option>
+                            <option value="2">★★ — 2 sterren</option>
+                            <option value="1">★ — 1 ster</option>
+                        </select>
+                    </div>
+                )}
                 {laden ? (
                     <p className="status-message fade-in" role="status">
                         De beoordelingen worden geladen...
                     </p>
-                ) : commentaren.length === 0 ? (
+                )  : commentaren.length === 0 ||
+                    !commentaren.some((commentaar) =>
+                    scoreFilter === 'ALL' ||
+                    Number(commentaar.score) === Number(scoreFilter)
+                    ) ? (
                     <div className="empty-state fade-in">
                         <h3>Geen beoordelingen gevonden</h3>
                         <p>Er zijn momenteel geen beoordelingen beschikbaar.</p>
                     </div>
                 ) : (
                     <section className="review-admin-grid fade-in">
-                        {commentaren.map((commentaar) => {
+
+                        {[...commentaren]
+                            .filter((commentaar) =>
+                                scoreFilter === 'ALL' ||
+                                Number(commentaar.score) === Number(scoreFilter)
+                            )
+                            .sort((a, b) => Number(b.id) - Number(a.id))
+                            .map((commentaar) => {
+
                             const score = Math.max(0, Math.min(5, Number(commentaar.score) || 0));
 
                             return (

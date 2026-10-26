@@ -115,7 +115,9 @@ export default function ReservationPage() {
 
                 {!laden && !fout && reserveringen.length > 0 && (
                     <div className="reservation-list slide-in" style={{ display: 'grid', gap: '20px' }}>
-                        {reserveringen.map((reservering, index) => {
+                        {[...reserveringen]
+                            .sort((a, b) => new Date(b.reservatieDatum) - new Date(a.reservatieDatum))
+                            .map((reservering, index) => {
                             const boek = reservering.boek;
                             const coverIndex = boek?.titel ? (boek.titel.length % 5) + 1 : 1;
 
