@@ -17,7 +17,8 @@ Beheerders kunnen boeken en auteurs beheren, gebruikersaccounts beheren, reserve
 ## Technologieën
 
 ### Backend
-- Java 21
+- Java JDK 25.0.3
+- Java target version 21
 - Spring Boot
 - Spring Security
 - Spring Data JPA/ Hibernate
