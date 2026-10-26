@@ -46,6 +46,7 @@ public class BookController {
             @RequestParam("titel") String titel,
             @RequestParam("isbn") String isbn,
             @RequestParam("omschrijving") String omschrijving,
+            @RequestParam(value = "genres", required = false) List<String> genres,
             @RequestParam("prijs") BigDecimal prijs,
             @RequestParam("voorraad") Integer voorraad,
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
@@ -55,6 +56,7 @@ public class BookController {
             book.setTitel(titel);
             book.setIsbn(isbn);
             book.setOmschrijving(omschrijving);
+            book.setGenres(genres);
             book.setPrijs(prijs);
             book.setVoorraad(voorraad);
 
@@ -73,6 +75,7 @@ public class BookController {
             @RequestParam("titel") String titel,
             @RequestParam("isbn") String isbn,
             @RequestParam("omschrijving") String omschrijving,
+            @RequestParam(value = "genres", required = false) List<String> genres,
             @RequestParam("prijs") BigDecimal prijs,
             @RequestParam("voorraad") Integer voorraad,
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
@@ -82,6 +85,7 @@ public class BookController {
             bookDetails.setTitel(titel);
             bookDetails.setIsbn(isbn);
             bookDetails.setOmschrijving(omschrijving);
+            bookDetails.setGenres(genres);
             bookDetails.setPrijs(prijs);
             bookDetails.setVoorraad(voorraad);
 

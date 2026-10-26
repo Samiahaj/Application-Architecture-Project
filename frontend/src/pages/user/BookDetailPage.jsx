@@ -259,6 +259,19 @@ export default function BookDetailPage() {
                                     ISBN: {boek.isbn}
                                 </p>
                             )}
+
+                            {Array.isArray(boek.genres) && boek.genres.length > 0 && (
+                                <p style={{
+                                    fontSize: '14px',
+                                    color: 'var(--burgundy)',
+                                    margin: '0 0 15px 0',
+                                    fontWeight: 600
+                                }}>
+                                    Genres : {boek.genres.join(', ')}
+                                </p>
+                            )}
+
+
                         </div>
 
                         <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--brown)' }}>

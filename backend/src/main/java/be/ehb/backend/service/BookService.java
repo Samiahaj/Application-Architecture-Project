@@ -58,6 +58,9 @@ public class BookService {
         book.setTitel(bookDetails.getTitel());
         book.setIsbn(bookDetails.getIsbn());
         book.setOmschrijving(bookDetails.getOmschrijving());
+
+        book.setGenres(bookDetails.getGenres());
+
         book.setPrijs(bookDetails.getPrijs());
         book.setVoorraad(bookDetails.getVoorraad());
 

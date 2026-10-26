@@ -37,6 +37,7 @@ function prijsFormatter(prijs) {
 export default function HomePage() {
     const [boeken, setBoeken] = useState([]);
     const [zoekterm, setZoekterm] = useState('');
+    const [genreFilter, setGenreFilter] = useState('ALL');
     const [laden, setLaden] = useState(true);
     const [fout, setFout] = useState('');
 
@@ -68,19 +69,44 @@ export default function HomePage() {
         };
     }, []);
 
+    const beschikbareGenres = useMemo(() => {
+        const alleGenres = boeken.flatMap((boek) =>
+            Array.isArray(boek.genres)
+                ? boek.genres
+                : boek.genre
+                    ? [boek.genre]
+                    : []
+        );
+
+        return [...new Set(
+            alleGenres
+                .map((genre) => genre.trim())
+                .filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b, 'nl'));
+
+    }, [boeken]);
     const gefilterdeBoeken = useMemo(() => {
         const term = zoekterm.trim().toLocaleLowerCase('nl');
 
-        if (!term) {
-            return boeken;
-        }
+        return boeken.filter((boek) => {
+            const komtOvereenMetZoekterm =
+                !term ||
+                `${boek.titel || ''} ${boek.omschrijving || ''} ${auteursTekst(boek)} ${boek.isbn || ''}`
+                    .toLocaleLowerCase('nl')
+                    .includes(term);
 
-        return boeken.filter((boek) =>
-            `${boek.titel || ''} ${boek.omschrijving || ''} ${auteursTekst(boek)} ${boek.isbn || ''}`
-                .toLocaleLowerCase('nl')
-                .includes(term)
-        );
-    }, [boeken, zoekterm]);
+            const genresVanBoek = Array.isArray(boek.genres)
+                ? boek.genres
+                : boek.genre
+                    ? [boek.genre]
+                    : [];
+
+            const komtOvereenMetGenre =
+                genreFilter === 'ALL' ||
+                genresVanBoek.some((genre) => genre.trim() === genreFilter);
+            return komtOvereenMetZoekterm && komtOvereenMetGenre;
+        });
+    }, [boeken, zoekterm, genreFilter]);
 
     return (
         <PageLayout>
@@ -166,6 +192,29 @@ export default function HomePage() {
                                 aria-label="Zoek boeken"
                             />
                         </label>
+                        <select
+                            value={genreFilter}
+                            onChange={(event) => setGenreFilter(event.target.value)}
+                            aria-label="Filter boeken op genre"
+                            style={{
+                                minWidth: '160px',
+                                height: '45px',
+                                padding: '0 12px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--line)',
+                                background: 'var(--white)',
+                                color: 'var(--brown-dark)',
+                                fontSize: '13px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="ALL">Alle genres</option>
+                            {beschikbareGenres.map((genre) => (
+                                <option key={genre} value={genre}>
+                                    {genre}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Laden */}
@@ -259,7 +308,25 @@ export default function HomePage() {
                                             <Link to={`/boeken/${boek.id}`}>
                                                 <h3 className="book-card-title">{boek.titel}</h3>
                                             </Link>
+                                            {(() => {
+                                                const genresVanBoek = Array.isArray(boek.genres)
+                                                    ? boek.genres
+                                                    : boek.genre
+                                                        ? [boek.genre]
+                                                        : [];
 
+                                                return genresVanBoek.length > 0 ? (
+                                                    <p style={{
+                                                        fontSize: '12px',
+                                                        color: 'var(--burgundy)',
+                                                        margin: '5px 0 10px',
+                                                        fontWeight: 600
+                                                    }}>
+                                                        Genres: {genresVanBoek.join(', ')}
+                                                    </p>
+                                                ) : null;
+
+                                            })()}
                                             <p className="book-description">
                                                 {boek.omschrijving || 'Geen beschrijving beschikbaar.'}
                                             </p>

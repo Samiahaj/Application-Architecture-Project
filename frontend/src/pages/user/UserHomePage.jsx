@@ -36,6 +36,7 @@ function prijsFormatter(prijs) {
 export default function UserHomePage() {
     const [boeken, setBoeken] = useState([]);
     const [zoekterm, setZoekterm] = useState('');
+    const [genreFilter, setGenreFilter] = useState('ALL');
     const [laden, setLaden] = useState(true);
     const [fout, setFout] = useState('');
 
@@ -66,17 +67,51 @@ export default function UserHomePage() {
         };
     }, []);
 
-    const gefilterdeBoeken = useMemo(() => {
-        const term = zoekterm.trim().toLocaleLowerCase('nl');
+    const beschikbareGenres = useMemo(() => {
+        const alleGenres = boeken.flatMap((boek) =>
+            Array.isArray(boek.genres)
+                ? boek.genres
+                : boek.genre
+                    ? [boek.genre]
+                    : []
+        );
 
-        if (!term) return boeken;
 
-        return boeken.filter((boek) =>
+return [...new Set(
+    alleGenres
+        .map((genre) => genre.trim())
+        .filter(Boolean)
+)].sort((a, b) => a.localeCompare(b, 'nl'));
+
+
+    }, [boeken]);
+
+
+const gefilterdeBoeken = useMemo(() => {
+    const term = zoekterm.trim().toLocaleLowerCase('nl');
+
+    return boeken.filter((boek) => {
+        const komtOvereenMetZoekterm =
+            !term ||
             `${boek.titel || ''} ${boek.omschrijving || ''} ${auteursTekst(boek)} ${boek.isbn || ''}`
                 .toLocaleLowerCase('nl')
-                .includes(term)
-        );
-    }, [boeken, zoekterm]);
+                .includes(term);
+
+        const genresVanBoek = Array.isArray(boek.genres)
+            ? boek.genres
+            : boek.genre
+                ? [boek.genre]
+                : [];
+
+        const komtOvereenMetGenre =
+            genreFilter === 'ALL' ||
+            genresVanBoek.some((genre) => genre.trim() === genreFilter);
+
+        return komtOvereenMetZoekterm && komtOvereenMetGenre;
+    });
+}, [boeken, zoekterm, genreFilter]);
+
+
 
     return (
         <PageLayout>
@@ -130,17 +165,51 @@ export default function UserHomePage() {
                             </p>
                         </div>
 
-                        <label className="search-box">
-                            <span aria-hidden="true">⌕</span>
 
-                            <input
-                                type="search"
-                                value={zoekterm}
-                                onChange={(event) => setZoekterm(event.target.value)}
-                                placeholder="Zoek op titel of auteur…"
-                                aria-label="Zoek boeken"
-                            />
-                        </label>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            flexWrap: 'wrap'
+                        }}>
+                            <label className="search-box">
+                                <span aria-hidden="true">⌕</span>
+                                <input
+                                    type="search"
+                                    value={zoekterm}
+                                    onChange={(event) => setZoekterm(event.target.value)}
+                                    placeholder="Zoek op titel of auteur…"
+                                    aria-label="Zoek boeken"
+                                />
+                            </label>
+
+                            <select
+                                value={genreFilter}
+                                onChange={(event) => setGenreFilter(event.target.value)}
+                                aria-label="Filter boeken op genre"
+                                style={{
+                                    minWidth: '160px',
+                                    height: '45px',
+                                    padding: '0 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--line)',
+                                    background: 'var(--white)',
+                                    color: 'var(--brown-dark)',
+                                    fontSize: '13px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="ALL">Alle genres</option>
+                                {beschikbareGenres.map((genre) => (
+                                    <option key={genre} value={genre}>
+                                        {genre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+
+
                     </div>
 
                     {laden && (
@@ -225,6 +294,28 @@ export default function UserHomePage() {
                                         <Link to={`/boeken/${boek.id}`}>
                                             <h3 className="book-card-title">{boek.titel}</h3>
                                         </Link>
+
+                                        {(() => {
+                                            const genresVanBoek = Array.isArray(boek.genres)
+                                                ? boek.genres
+                                                : boek.genre
+                                                    ? [boek.genre]
+                                                    : [];
+
+                                            return genresVanBoek.length > 0 ? (
+                                                <p style={{
+                                                    fontSize: '12px',
+                                                    color: 'var(--burgundy)',
+                                                    margin: '5px 0 10px',
+                                                    fontWeight: 600
+                                                }}>
+                                                    Genres: {genresVanBoek.join(', ')}
+                                                </p>
+                                            ) : null;
+
+                                        })()}
+
+
 
                                         <p className="book-description">
                                             {boek.omschrijving || 'Geen beschrijving beschikbaar.'}

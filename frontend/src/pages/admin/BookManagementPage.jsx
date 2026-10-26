@@ -12,6 +12,7 @@ const leegBoek = {
     isbn: '',
     titel: '',
     omschrijving: '',
+    genres: [],
     prijs: '',
     voorraad: '',
     imageFile: null,
@@ -42,6 +43,7 @@ export default function BookManagementPage() {
     const [formulier, setFormulier] = useState(leegBoek);
     const [opslaan, setOpslaan] = useState(false);
     const [bericht, setBericht] = useState('');
+    const [nieuwGenre, setNieuwGenre] = useState('');
 
     async function laadBoeken() {
         setLaden(true);
@@ -156,7 +158,46 @@ export default function BookManagementPage() {
                 .includes(term)
         );
     }, [boeken, zoekterm]);
+    const beschikbareGenres = useMemo(() => {
+        const genresUitBoeken = boeken.flatMap((boek) =>
+            Array.isArray(boek.genres)
+                ? boek.genres
+                : boek.genre
+                    ? [boek.genre]
+                    : []
+        );
 
+        return [...new Set([
+            ...genresUitBoeken,
+            ...formulier.genres
+        ])]
+            .map((genre) => genre.trim())
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b, 'nl'));
+    }, [boeken, formulier.genres]);
+
+    function voegGenreToe() {
+        const genre = nieuwGenre.trim();
+
+        if (!genre) return;
+
+        const bestaandGenre = beschikbareGenres.find(
+            (item) =>
+                item.toLocaleLowerCase('nl') ===
+                genre.toLocaleLowerCase('nl')
+        );
+
+        const gekozenGenre = bestaandGenre || genre;
+
+        setFormulier((vorig) => ({
+            ...vorig,
+            genres: vorig.genres.includes(gekozenGenre)
+                ? vorig.genres
+                : [...vorig.genres, gekozenGenre]
+        }));
+
+        setNieuwGenre('');
+    }
     function wijzigVeld(event) {
         const { name, value } = event.target;
         setFormulier((vorig) => ({ ...vorig, [name]: value }));
@@ -177,6 +218,11 @@ export default function BookManagementPage() {
             isbn: boek.isbn || '',
             titel: boek.titel || '',
             omschrijving: boek.omschrijving || '',
+            genres: Array.isArray(boek.genres)
+                ? boek.genres
+                : boek.genre
+                    ? [boek.genre]
+                    : [],
             prijs: boek.prijs ?? '',
             voorraad: boek.voorraad ?? '',
             imageFile: null,
@@ -197,6 +243,10 @@ export default function BookManagementPage() {
             setFout('Vul de titel van het boek in.');
             return;
         }
+        if (!Array.isArray(formulier.genres) || formulier.genres.length === 0) {
+            setFout('Selecteer minstens één genre voor het boek.');
+            return;
+        }
 
         if (formulier.prijs === '' || Number(formulier.prijs) < 0) {
             setFout('Vul een geldige prijs in.');
@@ -213,6 +263,9 @@ export default function BookManagementPage() {
         formData.append('isbn', formulier.isbn.trim());
         formData.append('titel', formulier.titel.trim());
         formData.append('omschrijving', formulier.omschrijving.trim());
+        formulier.genres.forEach((genre) => {
+            formData.append('genres', genre);
+        });
         formData.append('prijs', formulier.prijs);
         formData.append('voorraad', formulier.voorraad);
 
@@ -320,6 +373,75 @@ export default function BookManagementPage() {
 
                             <label htmlFor="omschrijving">Beschrijving</label>
                             <textarea id="omschrijving" name="omschrijving" value={formulier.omschrijving} onChange={wijzigVeld} rows={3} />
+
+
+                            <fieldset style={{
+                                border: '1px solid var(--line)',
+                                borderRadius: '8px',
+                                padding: '15px',
+                                margin: '0'
+                            }}>
+                                <legend style={{ padding: '0 6px', fontWeight: 600 }}>
+                                    Genres *
+                                </legend>
+
+                                {beschikbareGenres.map((genre) => (
+                                    <label
+                                        key={genre}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            margin: '8px 16px 8px 0',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={formulier.genres.includes(genre)}
+                                            onChange={(event) => {
+                                                setFormulier((vorig) => ({
+                                                    ...vorig,
+                                                    genres: event.target.checked
+                                                        ? [...vorig.genres, genre]
+                                                        : vorig.genres.filter(
+                                                            (item) => item !== genre
+                                                        )
+                                                }));
+                                            }}
+                                        />
+                                        {genre}
+                                    </label>
+                                ))}
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        marginTop: '12px'
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        value={nieuwGenre}
+                                        onChange={(event) => setNieuwGenre(event.target.value)}
+                                        placeholder="Nieuw genre..."
+                                        aria-label="Nieuw genre"
+                                    />
+
+                                    <button
+                                        className="button button-outline button-small"
+                                        type="button"
+                                        onClick={voegGenreToe}
+                                        disabled={!nieuwGenre.trim()}
+                                    >
+                                        + Genre toevoegen
+                                    </button>
+                                </div>
+                            </fieldset>
+
+
+
 
                             <label htmlFor="imageFile">Boekomslag (Afbeelding vanaf PC)</label>
                             <input

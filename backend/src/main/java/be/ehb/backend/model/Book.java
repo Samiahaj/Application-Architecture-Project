@@ -31,6 +31,14 @@ public class Book {
     @Column(nullable = false)
     private String titel;
 
+    @ElementCollection
+    @CollectionTable(
+            name = "book_genres",
+            joinColumns = @JoinColumn(name = "book_id")
+    )
+    @Column(name = "genre", nullable = false, length = 50)
+    private List<String> genres = new ArrayList<>();
+
     @NotBlank(message = "Omschrijving mag niet leeg zijn")
     @Column(nullable = false, columnDefinition = "TEXT")
 
@@ -59,7 +67,23 @@ public class Book {
 
     public Book() {
     }
+    public List<String> getGenres() {
+        return genres;
+    }
 
+    public void setGenres(List<String> genres) {
+        this.genres.clear();
+
+        if (genres != null) {
+            this.genres.addAll(
+                    genres.stream()
+                            .filter(genre -> genre != null && !genre.isBlank())
+                            .map(String::trim)
+                            .distinct()
+                            .toList()
+            );
+        }
+    }
     public Long getId() {
         return id;
     }

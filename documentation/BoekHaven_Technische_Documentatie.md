@@ -123,6 +123,7 @@ Een boek bevat onder meer de volgende gegevens:
 - `prijs` — prijs van het boek; moet groter zijn dan nul.
 - `voorraad` — beschikbare voorraad; mag niet negatief zijn.
 - `imageUrl` — optionele verwijzing naar de boekafbeelding.
+- `genres` — een lijst met één of meerdere genres die aan een boek gekoppeld zijn.
 - `auteurs` — auteurs die aan het boek gekoppeld zijn.
 
 De relatie tussen boeken en auteurs is many-to-many en gebruikt de tussentabel `book_authors`.
@@ -184,7 +185,6 @@ De frontend gebruikt als basisadres `http://localhost:8080`. De onderstaande end
 | `DELETE` | `/api/books/{id}` | Verwijdert een boek. | Alleen `ADMIN` |
 | `POST` | `/api/books/{bookId}/authors/{authorId}` | Koppelt een auteur aan een boek. | Alleen `ADMIN` |
 
-De endpoints voor het aanmaken en aanpassen van boeken gebruiken requestparameters en kunnen een `MultipartFile` voor een afbeelding ontvangen. Ze verwachten dus niet uitsluitend een JSON-requestbody. De controller vangt fouten tijdens deze acties af en retourneert in dat geval een `400 Bad Request`.
 
 De service controleert onder andere of een ISBN al bestaat. De validatie van boekvelden omvat verplichte waarden, een positieve prijs en een voorraad van nul of hoger.
 
@@ -273,7 +273,7 @@ Bij het aanmaken van een beoordeling moet de score tussen 1 en 5 liggen. De teks
 - probeert foutmeldingen van de backend leesbaar door te geven;
 - retourneert `null` voor antwoorden met status `204`.
 
-De boekformulieren kunnen multipart-formuliergegevens versturen om boekgegevens, auteur-id's en optioneel een afbeelding aan de backend door te geven.
+De boekformulieren kunnen multipart-formuliergegevens versturen om boekgegevens, auteur-id's en optioneel een afbeelding aan de backend door te geven.Het boekbeheer ondersteunt meerdere genres per boek en laat beheerders nieuwe genres toevoegen. Op de openbare startpagina en de gebruikersstartpagina worden meerdere genres weergegeven en kunnen boeken op genre worden gefilterd.
 
 ### 8.2 Authenticatie en navigatie
 
