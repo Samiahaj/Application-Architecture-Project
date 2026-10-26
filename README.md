@@ -7,12 +7,7 @@ BoekHaven is een webapplicatie voor een fictieve boekenwinkel. De applicatie laa
 Gebruikers kunnen zich registreren en aanmelden, hun profiel beheren, boeken reserveren en beoordelingen schrijven voor boeken die ze hebben opgehaald.
 
 Beheerders kunnen boeken en auteurs beheren, gebruikersaccounts beheren, reserveringen opvolgen en antwoorden op beoordelingen beheren.
-## Projectstructuur
 
-- `backend/` - De Spring Boot backend
-- `frontend/` - De frontend van de applicatie
-- `documentation/` - De technische documentatie
-- `planning/` - De planning van het project
 
 ## Technologieën
 
@@ -45,11 +40,83 @@ Beheerders kunnen boeken en auteurs beheren, gebruikersaccounts beheren, reserve
 - Antwoorden op beoordelingen beheren. 
 - Gebruikersrollen beheren en accounts blokkeren of deblokkeren. 
 - Toegang tot functionaliteiten beveiligen op basis van gebruikersrollen.
+## Projectstructuur
 
+```text
+Application-Architecture-Project/
+├── README.md
+├── backend/
+│   ├── pom.xml
+│   └── src/
+│       ├── main/
+│       │   ├── java/be/ehb/backend/
+│       │   │   ├── config/
+│       │   │   ├── controller/
+│       │   │   ├── dto/
+│       │   │   ├── model/
+│       │   │   ├── repository/
+│       │   │   └── service/
+│       │   └── resources/
+│       └── test/
+├── frontend/
+│   ├── package.json
+│   └── src/
+├── documentation/
+│   └── BoekHaven_Technische_Documentatie.md
+└── planning/
+    └── ProjectPlanning.md
+   ```
+
+## Architectuur en design patterns
+
+De applicatie bestaat uit een aparte frontend en backend. De frontend communiceert met de backend via HTTP-aanvragen naar de REST API.
+
+De backend is onderverdeeld in verschillende lagen:
+
+- **Controller:** verwerkt HTTP-aanvragen en stuurt antwoorden terug naar de frontend.
+- **Service:** bevat de bedrijfslogica en voert controles uit.
+- **Repository:** verzorgt de communicatie met de database.
+- **Model:** stelt de gegevensstructuren en database-entiteiten voor.
+- **DTO:** wordt gebruikt om gegevens tussen de frontend en backend uit te wisselen.
+- **Config:** bevat configuratie, waaronder beveiligingsinstellingen.
+
+Deze structuur past het principe van *separation of concerns* toe. Daarnaast wordt gebruikgemaakt van een service layer, het repository/DAO-patroon en een MVC-achtige architectuur.
+
+De frontend en backend zijn afzonderlijke projecten. De backend bestaat uit één Spring Boot-applicatie met meerdere interne services en is dus geen afzonderlijke microservicesarchitectuur.
 ## Documentatie
 
 Raadpleeg de map documentation/ voor de technische documentatie, inclusief de installatie- en opstartinstructies. 
 De projectplanning bevindt zich in de map planning/.
+
+## Installatie en lokaal opstarten
+
+Alle informatie over de installatie en configuratie van de applicatie, het instellen van de MySQL-database en het lokaal opstarten van de frontend en backend vind je in de technische documentatie:
+
+`documentation/BoekHaven_Technische_Documentatie.md`
+
+Raadpleeg dit document voordat je het project uitvoert.
+
+## Tests
+
+De backendtests bevinden zich in:
+
+`backend/src/test/java/`
+
+De tests behandelen onder andere functionaliteiten met betrekking tot boeken, auteurs, gebruikers, reserveringen en reviews.
+
+Voer de tests uit vanuit de backendmap met Maven:
+
+```bash
+mvn test
+```
+
+Belangrijke testscenario's zijn:
+
+1. Controleren of de voorraad correct wordt aangepast na een reservering.
+2. Controleren of een reservering wordt geweigerd wanneer er onvoldoende voorraad is.
+3. Controleren of gebruikersgegevens correct worden verwerkt.
+4. Controleren of reviews voldoen aan de voorwaarden.
+5. Controleren of gebruikers alleen toegang hebben tot toegestane functionaliteiten.
 
 ## Status
 
@@ -61,3 +128,4 @@ Bij het uitwerken van dit project heb ik gebruikgemaakt van ChatGPT (OpenAI) als
 ChatGPT heeft mij geholpen bij de verschillende stappen van het project, onder andere bij het structureren van mijn ideeën, het begrijpen van bepaalde onderwerpen en het oplossen van problemen tijdens het programmeren. 
 Daarnaast heb ik ChatGPT gebruikt om uitleg te krijgen over de code en om hulp te krijgen bij het opsporen en verbeteren van fouten. 
 ChatGPT diende hierbij als ondersteunend hulpmiddel tijdens mijn eigen werk aan het project.
+- OpenAI — ChatGPT: https://chatgpt.com/
