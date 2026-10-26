@@ -21,8 +21,11 @@ Beheerders kunnen boeken en auteurs beheren, gebruikersaccounts beheren, reserve
 - Java target version 21
 - Spring Boot
 - Spring Security
+- Spring Web MVC
+- Bean Validation
 - Spring Data JPA/ Hibernate
 - Maven
+- MySQL Connector/J
 
 ### Frontend
 - React
