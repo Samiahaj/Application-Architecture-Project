@@ -65,7 +65,8 @@ public class SecurityConfig {
                                 "/api/books",
                                 "/api/books/**",
                                 "/api/authors",
-                                "/api/authors/**"
+                                "/api/authors/**",
+                                "/uploads/**"
                         ).permitAll()
                         // Beoordelingen bekijken is openbaar
                         .requestMatchers(
